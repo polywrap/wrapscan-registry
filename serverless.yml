@@ -1,0 +1,85 @@
+service: wrapscan-registry-gateway
+provider:
+  name: aws
+  runtime: rust
+  stage: dev
+  region: us-east-1
+  memorySize: 128
+  timeout: 3
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [ packagesTable, Arn ]
+  environment:
+    PACKAGES_TABLE: ${self:custom.packagesTable}
+    WRAPPERS_GATEWAY_ADMIN_KEY: ${self:custom.wrappersGatewayAdminKey.wrappers_gateway_admin_key}
+    ACCOUNT_SERVICE_URI: https://accounts.wrappers.dev
+
+package: 
+  individually: true
+
+custom:
+  serverless-offline:
+    reloadHandler: true
+  rust:
+    dockerless: true
+  customDomain:
+    domainName: wraps.wrappers.dev
+    stage: ${self:provider.stage}
+    certificateName: wrappers.dev
+    createRoute53Record: true
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8001
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+  packagesTable: 'wraps-table-${sls:stage}'
+  wrappersGatewayAdminKey: ${ssm:/aws/reference/secretsmanager/wrappers-gateway-admin-key}
+
+plugins:
+  - serverless-domain-manager
+  - serverless-dynamodb-local
+  - serverless-offline
+  - serverless-rust
+
+functions:
+  publish:
+    handler: gateway_service
+    runtime: rust
+    events:
+      - http:
+          path: u/{user}/{packageAndVersion}
+          method: post
+          cors: true
+  resolve:
+    handler: gateway_service
+    runtime: rust
+    events:
+      - http:
+          path: u/{user}/{packageAndVersion}/{filePath}
+          method: get
+          cors: true
+resources:
+  Resources:
+    packagesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:custom.packagesTable}

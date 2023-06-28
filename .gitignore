@@ -1,0 +1,6 @@
+target
+node_modules
+.serverless
+.s3-local
+.dynamodb
+coverage
