@@ -2,7 +2,7 @@ use axum::{body::BoxBody, extract::Path, http::StatusCode, response::Response};
 
 use crate::{
     constants, extract_package_and_version, resolve_package, resolving::ResolveError, Package,
-    Repository,
+    Repository, validate_package_name,
 };
 
 pub async fn resolve(
@@ -10,6 +10,10 @@ pub async fn resolve(
     package_repo: impl Repository<Package>,
 ) -> Result<Response, StatusCode> {
     let (package_name, version_name) = extract_package_and_version(&package_and_version);
+
+    if !validate_package_name(package_name.clone()) {
+        return Err(StatusCode::BAD_REQUEST);
+    }
 
     let uri = resolve_package(&user, package_name, version_name, &package_repo)
         .await
@@ -52,15 +56,24 @@ mod tests {
     async fn can_resolve_package() {
         let mut package_repo = MockPackageRepository::new();
 
-        let uri = "uri1";
         let package = Package {
             id: "user1/package1".into(),
             name: "package1".into(),
             user: "user1".into(),
-            versions: vec![Version {
-                name: "1.0.0".into(),
-                uri: uri.to_string(),
-            }],
+            versions: vec![
+                Version {
+                    name: "1.0.0".into(),
+                    uri: "uri0".into(),
+                },
+                Version {
+                    name: "1.0.1".into(),
+                    uri: "uri1".into(),
+                },
+                Version {
+                    name: "1.0.2".into(),
+                    uri: "uri2".into(),
+                }
+            ],
         };
 
         package_repo
@@ -69,13 +82,13 @@ mod tests {
             .return_once(move |_| Ok(package.clone()));
 
         let result = resolve(
-            Path(("user1".into(), "package1@1.0.0".into())),
+            Path(("user1".into(), "package1@1.0.1".into())),
             package_repo,
         )
         .await;
 
         let expected_response = UriResponse {
-            uri: uri.to_string(),
+            uri: "uri1".to_string(),
         };
 
         let _: Result<Json<UriResponse>, StatusCode> = Ok(Json(expected_response));
@@ -123,5 +136,39 @@ mod tests {
         .await;
 
         assert!(matches!(result, Err(StatusCode::NOT_FOUND)));
+    }
+
+    #[tokio::test]
+    async fn invalid_package_name_returns_bad_request1() {
+        let mut package_repo = MockPackageRepository::new();
+
+        package_repo
+            .expect_read()
+            .times(0);
+
+        let result = resolve(
+            Path(("user1".into(), "pack!age1@1.0.0".into())),
+            package_repo,
+        )
+        .await;
+
+        assert!(matches!(result, Err(StatusCode::BAD_REQUEST)));
+    }
+
+    #[tokio::test]
+    async fn invalid_package_name_returns_bad_request2() {
+        let mut package_repo = MockPackageRepository::new();
+
+        package_repo
+            .expect_read()
+            .times(0);
+
+        let result = resolve(
+            Path(("user1".into(), "pack age1@1.0.0".into())),
+            package_repo,
+        )
+        .await;
+
+        assert!(matches!(result, Err(StatusCode::BAD_REQUEST)));
     }
 }
