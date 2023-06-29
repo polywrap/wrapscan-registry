@@ -24,3 +24,5 @@ use resolving::*;
 
 mod extract_package_and_version;
 use extract_package_and_version::extract_package_and_version;
+
+mod constants;

@@ -1,10 +1,9 @@
 use axum::{body::BoxBody, extract::Path, http::StatusCode, response::Response};
 
 use crate::{
-    extract_package_and_version, resolve_package, resolving::ResolveError, Package, Repository,
+    constants, extract_package_and_version, resolve_package, resolving::ResolveError, Package,
+    Repository,
 };
-
-const WRAP_URI_HEADER: &str = "x-wrap-uri";
 
 pub async fn resolve(
     Path((user, package_and_version)): Path<(String, String)>,
@@ -25,7 +24,7 @@ pub async fn resolve(
 
     let response: Response = Response::builder()
         .status(StatusCode::OK)
-        .header(WRAP_URI_HEADER, uri)
+        .header(constants::WRAP_URI_HEADER, uri)
         .body(BoxBody::default())
         .unwrap();
 

@@ -3,9 +3,9 @@ use aws_sdk_dynamodb::Client;
 use axum::{extract::Path, http::StatusCode, response::Response, routing::get, Json, Router};
 use lambda_http::{run, Error as HttpError};
 
-use crate::{dynamodb::PackageRepository, functions, setup_logging, Package, Repository};
-
-const ENV_PACKAGES_TABLE: &str = "PACKAGES_TABLE";
+use crate::{
+    constants, dynamodb::PackageRepository, functions, setup_logging, Package, Repository,
+};
 
 pub async fn setup_routes() -> Result<(), HttpError> {
     setup_logging();
@@ -39,7 +39,8 @@ async fn publish_package(
 }
 
 async fn get_package_repository() -> impl Repository<Package> {
-    let table_name = std::env::var(ENV_PACKAGES_TABLE).expect("ENV_PACKAGES_TABLE not set");
+    let table_name =
+        std::env::var(constants::ENV_PACKAGES_TABLE).expect("ENV_PACKAGES_TABLE not set");
     let client = {
         let config = aws_config::load_from_env().await;
         Client::new(&config)
