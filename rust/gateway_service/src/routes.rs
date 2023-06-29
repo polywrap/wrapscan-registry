@@ -1,10 +1,10 @@
 use aws_sdk_dynamodb::Client;
 
-use axum::{extract::Path, http::StatusCode, response::Response, routing::get, Json, Router};
+use axum::{extract::Path, http::{StatusCode, HeaderMap}, response::Response, routing::get, Json, Router};
 use lambda_http::{run, Error as HttpError};
 
 use crate::{
-    constants, dynamodb::PackageRepository, functions, setup_logging, Package, Repository,
+    constants, dynamodb::PackageRepository, functions, setup_logging, Package, Repository, AccountService, RemoteAccountService,
 };
 
 pub async fn setup_routes() -> Result<(), HttpError> {
@@ -31,11 +31,13 @@ pub struct UriBody {
 
 async fn publish_package(
     path: Path<(String, String)>,
+    headers: HeaderMap,
     body: Json<UriBody>,
 ) -> Result<Response, StatusCode> {
     let package_repo = get_package_repository().await;
+    let account_service = get_account_service().await;
 
-    functions::publish(path, body, package_repo).await
+    functions::publish(path, body, headers, package_repo, account_service).await
 }
 
 async fn get_package_repository() -> impl Repository<Package> {
@@ -47,4 +49,10 @@ async fn get_package_repository() -> impl Repository<Package> {
     };
 
     PackageRepository::new(client, table_name)
+}
+
+async fn get_account_service() -> impl AccountService {
+    RemoteAccountService::new(
+        std::env::var(constants::ENV_ACCOUNT_SERVICE_URL).expect("ENV_ACCOUNT_SERVICE_URL not set"),
+    )
 }

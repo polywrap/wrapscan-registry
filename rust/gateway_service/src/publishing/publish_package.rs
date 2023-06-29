@@ -4,10 +4,6 @@ use crate::{semver, Package, PartialVersion, Repository, RepositoryError, Versio
 
 use super::error::PublishError;
 
-async fn verify_user_key(api_key: &str) -> bool {
-    true
-}
-
 use super::publish_latest_version;
 
 pub async fn publish_package(
@@ -17,8 +13,6 @@ pub async fn publish_package(
     uri: String,
     package_repo: impl Repository<Package>,
 ) -> Result<(), PublishError> {
-    // let is_verified = verify_user_key().await;
-
     if let Some(version) = version_name {
         if !semver::verify(&PartialVersion {
             name: version.to_string(),
