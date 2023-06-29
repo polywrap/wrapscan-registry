@@ -67,8 +67,8 @@ mod tests {
     async fn can_resolve_package() {
         let mut mock_repo = MockPackageRepository::new();
 
-        let user = Username::try_from("user1".to_string()).unwrap();
-        let package_name = PackageName::try_from("package1".to_string()).unwrap();
+        let user: Username = "user1".parse().unwrap();
+        let package_name: PackageName = "package1".parse().unwrap();
         let id = format!("{}/{}", user, package_name);
 
         let expected_package = Package {
@@ -102,8 +102,8 @@ mod tests {
     async fn resolves_package_with_specified_version() {
         let mut mock_repo = MockPackageRepository::new();
 
-        let user = Username::try_from("user1".to_string()).unwrap();
-        let package_name = PackageName::try_from("package1".to_string()).unwrap();
+        let user: Username = "user1".parse().unwrap();
+        let package_name: PackageName = "package1".parse().unwrap();
         let id = format!("{}/{}", user, package_name);
 
         let expected_package = Package {
@@ -137,8 +137,8 @@ mod tests {
     async fn returns_version_not_found_error_when_resolving_package_with_non_existent_version() {
         let mut mock_repo = MockPackageRepository::new();
 
-        let user = Username::try_from("user1".to_string()).unwrap();
-        let package_name = PackageName::try_from("package1".to_string()).unwrap();
+        let user: Username = "user1".parse().unwrap();
+        let package_name: PackageName = "package1".parse().unwrap();
         let id = format!("{}/{}", user, package_name);
 
         let expected_package = Package {
@@ -172,8 +172,8 @@ mod tests {
     async fn returns_package_not_found_when_resolving_non_existent_package() {
         let mut mock_repo = MockPackageRepository::new();
 
-        let user = Username::try_from("user1".to_string()).unwrap();
-        let package_name = PackageName::try_from("package1".to_string()).unwrap();
+        let user: Username = "user1".parse().unwrap();
+        let package_name: PackageName = "package1".parse().unwrap();
         let id = format!("{}/{}", user, package_name);
 
         mock_repo
@@ -191,8 +191,8 @@ mod tests {
     async fn returns_repository_error_when_resolving_package_with_repository_error() {
         let mut mock_repo = MockPackageRepository::new();
 
-        let user = Username::try_from("user1".to_string()).unwrap();
-        let package_name = PackageName::try_from("package1".to_string()).unwrap();
+        let user: Username = "user1".parse().unwrap();
+        let package_name: PackageName = "package1".parse().unwrap();
         let id = format!("{}/{}", user, package_name);
 
         mock_repo

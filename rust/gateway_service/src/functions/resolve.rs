@@ -32,12 +32,12 @@ pub async fn resolve(
 }
 
 fn build_username_package_and_version(user: String, package_and_version: &str) -> Result<(Username, PackageName, Option<&str>), StatusCode> {
-    let username = Username::try_from(user)
+    let username = user.parse()
         .map_err(|_| StatusCode::BAD_REQUEST)?;
 
     let (package_name, version_name) = extract_package_and_version(&package_and_version);
 
-    let package_name = PackageName::try_from(package_name.to_string())
+    let package_name = package_name.parse()
         .map_err(|_| StatusCode::BAD_REQUEST)?;
 
     Ok((username, package_name, version_name))
@@ -66,8 +66,8 @@ mod tests {
 
         let package = Package {
             id: "user1/package1".into(),
-            name: PackageName::try_from("package1".to_string()).unwrap(),
-            user: Username::try_from("user1".to_string()).unwrap(),
+            name: "package1".parse().unwrap(),
+            user: "user1".parse().unwrap(),
             versions: vec![
                 Version {
                     name: "1.0.0".into(),
@@ -110,8 +110,8 @@ mod tests {
 
         let package = Package {
             id: "user1/package1".into(),
-            name: PackageName::try_from("package1".to_string()).unwrap(),
-            user: Username::try_from("user1".to_string()).unwrap(),
+            name: "package1".parse().unwrap(),
+            user: "user1".parse().unwrap(),
             versions: vec![
                 Version {
                     name: "1.0.0".into(),
@@ -168,8 +168,8 @@ mod tests {
 
         let package = Package {
             id: "user1/package1".into(),
-            name: PackageName::try_from("package1".to_string()).unwrap(),
-            user: Username::try_from("user1".to_string()).unwrap(),
+            name: "package1".parse().unwrap(),
+            user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "uri1".into(),

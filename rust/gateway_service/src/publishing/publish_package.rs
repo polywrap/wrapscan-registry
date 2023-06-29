@@ -93,8 +93,8 @@ mod tests {
     async fn can_publish_version() {
         let package = Package {
             id: "user1/package1".into(),
-            name: PackageName::try_from("package1".to_string()).unwrap(),
-            user: Username::try_from("user1".to_string()).unwrap(),
+            name: "package1".parse().unwrap(),
+            user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "uri1".into(),
@@ -138,8 +138,8 @@ mod tests {
     async fn forbids_publishing_duplicate_version() {
         let package = Package {
             id: "user1/package1".into(),
-            name: PackageName::try_from("package1".to_string()).unwrap(),
-            user: Username::try_from("user1".to_string()).unwrap(),
+            name: "package1".parse().unwrap(),
+            user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "uri1".into(),
@@ -174,8 +174,8 @@ mod tests {
     async fn forbids_publishing_invalid_version() {
         let package = Package {
             id: "user1/package1".into(),
-            name: PackageName::try_from("package1".to_string()).unwrap(),
-            user: Username::try_from("user1".to_string()).unwrap(),
+            name: "package1".parse().unwrap(),
+            user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "uri1".into(),
