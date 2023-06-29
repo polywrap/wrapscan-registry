@@ -12,11 +12,11 @@ pub async fn resolve(
 ) -> Result<Response, StatusCode> {
     let (package_name, version_name) = extract_package_and_version(&package_and_version);
 
-    let uri = resolve_package(&user, package_name, version_name, package_repo).await
+    let uri = resolve_package(&user, package_name, version_name, &package_repo).await
         .map_err(|e| match e {
             ResolveError::PackageNotFound => StatusCode::NOT_FOUND,
             ResolveError::VersionNotFound => StatusCode::NOT_FOUND,
-            ResolveError::RepositoryError => StatusCode::INTERNAL_SERVER_ERROR,
+            ResolveError::RepositoryError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         })?;
    
     let response: Response = Response::builder()
@@ -28,18 +28,18 @@ pub async fn resolve(
     Ok(response)
 }
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, PartialEq)]
 pub enum ResolveError {
     PackageNotFound,
     VersionNotFound,
-    RepositoryError,
+    RepositoryError(String),
 }
 impl Display for ResolveError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ResolveError::PackageNotFound => write!(f, "Package not found"),
             ResolveError::VersionNotFound => write!(f, "Version not found"),
-            ResolveError::RepositoryError => write!(f, "Repository error"),
+            ResolveError::RepositoryError(e) => write!(f, "Repository error: {}", e),
         }
     }
 }
@@ -48,7 +48,7 @@ async fn resolve_package(
     user: &str, 
     package_name: &str, 
     version_name: Option<&str>, 
-    package_repo: impl Repository<Package>
+    package_repo: &impl Repository<Package>
 ) -> Result<String, ResolveError> {
     let id = format!("{}/{}", user, package_name);
 
@@ -57,7 +57,7 @@ async fn resolve_package(
         .await
         .map_err(|error| match error {
             RepositoryError::NotFound => ResolveError::PackageNotFound,
-            _ => ResolveError::RepositoryError,
+            RepositoryError::Unknown(e) => ResolveError::RepositoryError(e.to_string()),
         })?;
 
     Ok(if let Some(version) = version_name {
@@ -73,4 +73,166 @@ async fn resolve_package(
     
         latest_version.uri.clone()
     })
+}
+
+
+#[cfg(test)]
+mod tests {
+    use async_trait::async_trait;
+    use mockall::{mock, predicate::eq};
+
+    use crate::{Repository, Package, RepositoryError, Version, functions::resolve::{resolve_package, ResolveError}};
+
+    mock! {
+      PackageRepository {} 
+        #[async_trait]
+        impl Repository<Package> for PackageRepository { 
+            async fn read(&self, key: &str) -> Result<Package, RepositoryError>;
+            async fn update(&self, entity: &Package) -> Result<(), RepositoryError>;
+        }
+    }
+
+    #[tokio::test]
+    async fn can_resolve_package() {
+        let mut mock_repo = MockPackageRepository::new();
+
+        let user = "user1";
+        let package_name = "package1";
+        let id = format!("{}/{}", user, package_name);
+        
+        let expected_package = Package {
+            id: id.clone(),
+            user: user.to_string(),
+            name: package_name.to_string(),
+            versions: vec![
+                Version { 
+                    name: "1.0.0".to_string(), 
+                    uri: "uri1".to_string() 
+                },
+                Version { 
+                    name: "2.0.0".to_string(), 
+                    uri: "uri2".to_string() 
+                },
+            ],
+        };
+
+        mock_repo.expect_read()
+            .with(eq(id.clone()))
+            .times(1)
+            .returning(move |_| Ok(expected_package.clone()));
+
+        let result = resolve_package(&user, &package_name, None, &mock_repo)
+            .await;
+
+        assert_eq!(result, Ok("uri2".to_string()));
+    }
+
+    #[tokio::test]
+    async fn resolves_package_with_specified_version() {
+        let mut mock_repo = MockPackageRepository::new();
+
+        let user = "user1";
+        let package_name = "package1";
+        let id = format!("{}/{}", user, package_name);
+
+        let expected_package = Package {
+            id: id.clone(),
+            user: user.to_string(),
+            name: package_name.to_string(),
+            versions: vec![
+                Version { 
+                    name: "1.0.0".to_string(), 
+                    uri: "uri1".to_string() 
+                },
+                Version { 
+                    name: "2.0.0".to_string(), 
+                    uri: "uri2".to_string() 
+                },
+            ],
+        };
+
+        mock_repo.expect_read()
+            .with(eq(id.clone()))
+            .times(1)
+            .returning(move |_| Ok(expected_package.clone()));
+
+        let result = resolve_package(&user, &package_name, Some("2.0.0"), &mock_repo)
+            .await;
+
+        assert_eq!(result, Ok("uri2".to_string()));
+    }
+
+    #[tokio::test]
+    async fn returns_version_not_found_error_when_resolving_package_with_non_existent_version() {
+        let mut mock_repo = MockPackageRepository::new();
+
+        let user = "user1";
+        let package_name = "package1";
+        let id = format!("{}/{}", user, package_name);
+
+        let expected_package = Package {
+            id: id.clone(),
+            user: user.to_string(),
+            name: package_name.to_string(),
+            versions: vec![
+                Version { 
+                    name: "1.0.0".to_string(), 
+                    uri: "uri1".to_string() 
+                },
+                Version { 
+                    name: "2.0.0".to_string(), 
+                    uri: "uri2".to_string() 
+                },
+            ],
+        };
+
+        mock_repo.expect_read()
+            .with(eq(id.clone()))
+            .times(1)
+            .returning(move |_| Ok(expected_package.clone()));
+
+        let result = resolve_package(&user, &package_name, Some("3.0.0"), &mock_repo)
+            .await;
+
+        assert_eq!(result, Err(ResolveError::VersionNotFound));
+    }
+
+    #[tokio::test]
+    async fn returns_package_not_found_when_resolving_non_existent_package() {
+        let mut mock_repo = MockPackageRepository::new();
+
+        let user = "user1";
+        let package_name = "package1";
+        let id = format!("{}/{}", user, package_name);
+
+        mock_repo.expect_read()
+            .with(eq(id.clone()))
+            .times(1)
+            .returning(move |_| Err(RepositoryError::NotFound));
+
+        let result = resolve_package(&user, &package_name, None, &mock_repo)
+            .await;
+
+        assert_eq!(result, Err(ResolveError::PackageNotFound));
+    }
+
+    #[tokio::test]
+    async fn returns_repository_error_when_resolving_package_with_repository_error() {
+        let mut mock_repo = MockPackageRepository::new();
+
+        let user = "user1";
+        let package_name = "package1";
+        let id = format!("{}/{}", user, package_name);
+
+        mock_repo.expect_read()
+            .with(eq(id.clone()))
+            .times(1)
+            .returning(move |_| Err(RepositoryError::Unknown("Some error".to_string())));
+
+        let result = resolve_package(&user, &package_name, None, &mock_repo)
+            .await;
+
+        assert_eq!(result, Err(ResolveError::RepositoryError("Some error".to_string())));
+    }
+
 }
