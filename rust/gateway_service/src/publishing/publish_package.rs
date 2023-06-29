@@ -1,4 +1,4 @@
-use crate::{Repository, Package, RepositoryError, Version, semver, PartialVersion};
+use crate::{semver, Package, PartialVersion, Repository, RepositoryError, Version};
 
 use super::error::PublishError;
 
@@ -9,11 +9,11 @@ async fn verify_user_key(api_key: &str) -> bool {
 use super::publish_latest_version;
 
 pub async fn publish_package(
-    user: &str, 
-    package_name: &str, 
-    version_name: Option<&str>, 
-    uri: String, 
-    package_repo: impl Repository<Package>
+    user: &str,
+    package_name: &str,
+    version_name: Option<&str>,
+    uri: String,
+    package_repo: impl Repository<Package>,
 ) -> Result<(), PublishError> {
     // let is_verified = verify_user_key().await;
 
@@ -24,13 +24,11 @@ pub async fn publish_package(
             return Err(PublishError::InvalidVersionFormat);
         }
     }
-    
+
     let new_version = version_name.unwrap_or("latest");
     let id = format!("{}/{}", user, package_name);
-    
-    let package = package_repo
-        .read(&id)
-        .await;
+
+    let package = package_repo.read(&id).await;
 
     let package = match package {
         Ok(package) => Some(package),
@@ -43,7 +41,11 @@ pub async fn publish_package(
             return publish_latest_version(&mut package, uri, package_repo).await;
         }
 
-        if package.versions.iter().any(|version| version.name == new_version) {
+        if package
+            .versions
+            .iter()
+            .any(|version| version.name == new_version)
+        {
             return Err(PublishError::DuplicateVersion);
         }
 
@@ -77,12 +79,15 @@ mod tests {
     use async_trait::async_trait;
     use mockall::{mock, predicate::eq};
 
-    use crate::{RepositoryError, Package, Repository, Version, publishing::{publish_package, PublishError}};
+    use crate::{
+        publishing::{publish_package, PublishError},
+        Package, Repository, RepositoryError, Version,
+    };
 
     mock! {
-      PackageRepository {} 
+      PackageRepository {}
         #[async_trait]
-        impl Repository<Package> for PackageRepository { 
+        impl Repository<Package> for PackageRepository {
             async fn read(&self, key: &str) -> Result<Package, RepositoryError>;
             async fn update(&self, entity: &Package) -> Result<(), RepositoryError>;
         }
@@ -94,36 +99,41 @@ mod tests {
             id: "user1/package1".into(),
             name: "package1".into(),
             user: "user1".into(),
-            versions: vec![Version { name: "1.0.0".into(), uri: "uri1".into() }]
+            versions: vec![Version {
+                name: "1.0.0".into(),
+                uri: "uri1".into(),
+            }],
         };
 
-        let new_version = Version { name: "2.0.0".into(), uri: "uri2".into() };
+        let new_version = Version {
+            name: "2.0.0".into(),
+            uri: "uri2".into(),
+        };
 
         let mut package_repo = MockPackageRepository::new();
 
         let read_package = package.clone();
-        package_repo.expect_read()
+        package_repo
+            .expect_read()
             .with(eq("user1/package1".to_string()))
-            .return_once(move |_| {
-                Ok(read_package.clone())
-            });
+            .return_once(move |_| Ok(read_package.clone()));
 
         let package = package.clone();
-        package_repo.expect_update()
+        package_repo
+            .expect_update()
             .withf(move |p| {
                 &p.id == &package.id && p.versions.len() == 2 && p.versions[1] == new_version
             })
-            .return_once(move |_| {
-                Ok(())
-            });
+            .return_once(move |_| Ok(()));
 
         let result = publish_package(
-            "user1", 
-            "package1", 
-            Some("2.0.0"), 
+            "user1",
+            "package1",
+            Some("2.0.0"),
             "uri2".into(),
-            package_repo
-        ).await;
+            package_repo,
+        )
+        .await;
 
         assert_eq!(result, Ok(()));
     }
@@ -134,27 +144,29 @@ mod tests {
             id: "user1/package1".into(),
             name: "package1".into(),
             user: "user1".into(),
-            versions: vec![Version { name: "1.0.0".into(), uri: "uri1".into() }]
+            versions: vec![Version {
+                name: "1.0.0".into(),
+                uri: "uri1".into(),
+            }],
         };
 
         let mut package_repo = MockPackageRepository::new();
 
-        package_repo.expect_read()
+        package_repo
+            .expect_read()
             .with(eq("user1/package1".to_string()))
-            .return_once(move |_| {
-                Ok(package.clone())
-            });
+            .return_once(move |_| Ok(package.clone()));
 
-        package_repo.expect_update()
-            .never();
+        package_repo.expect_update().never();
 
         let result = publish_package(
-            "user1", 
-            "package1", 
-            Some("1.0.0"), 
+            "user1",
+            "package1",
+            Some("1.0.0"),
             "uri2".into(),
-            package_repo
-        ).await;
+            package_repo,
+        )
+        .await;
 
         assert_eq!(result, Err(PublishError::DuplicateVersion));
     }
@@ -165,27 +177,29 @@ mod tests {
             id: "user1/package1".into(),
             name: "package1".into(),
             user: "user1".into(),
-            versions: vec![Version { name: "1.0.0".into(), uri: "uri1".into() }]
+            versions: vec![Version {
+                name: "1.0.0".into(),
+                uri: "uri1".into(),
+            }],
         };
 
         let mut package_repo = MockPackageRepository::new();
 
-        package_repo.expect_read()
+        package_repo
+            .expect_read()
             .with(eq("user1/package1".to_string()))
-            .return_once(move |_| {
-                Ok(package.clone())
-            });
+            .return_once(move |_| Ok(package.clone()));
 
-        package_repo.expect_update()
-            .never();
+        package_repo.expect_update().never();
 
         let result = publish_package(
-            "user1", 
-            "package1", 
-            Some("1.0.0a"), 
+            "user1",
+            "package1",
+            Some("1.0.0a"),
             "uri2".into(),
-            package_repo
-        ).await;
+            package_repo,
+        )
+        .await;
 
         assert_eq!(result, Err(PublishError::InvalidVersionFormat));
     }

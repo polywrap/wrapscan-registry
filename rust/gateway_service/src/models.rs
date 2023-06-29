@@ -37,4 +37,3 @@ impl IVersion for PartialVersion {
 pub struct UriResponse {
     pub uri: String,
 }
-

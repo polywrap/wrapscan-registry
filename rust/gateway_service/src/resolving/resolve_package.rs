@@ -1,34 +1,30 @@
 use std::fmt::Display;
 
-use crate::{RepositoryError, Repository, Package, semver};
+use crate::{semver, Package, Repository, RepositoryError};
 
 pub async fn resolve_package(
-    user: &str, 
-    package_name: &str, 
-    version_name: Option<&str>, 
-    package_repo: &impl Repository<Package>
+    user: &str,
+    package_name: &str,
+    version_name: Option<&str>,
+    package_repo: &impl Repository<Package>,
 ) -> Result<String, ResolveError> {
     let id = format!("{}/{}", user, package_name);
 
-    let package = package_repo
-        .read(&id)
-        .await
-        .map_err(|error| match error {
-            RepositoryError::NotFound => ResolveError::PackageNotFound,
-            RepositoryError::Unknown(e) => ResolveError::RepositoryError(e.to_string()),
-        })?;
+    let package = package_repo.read(&id).await.map_err(|error| match error {
+        RepositoryError::NotFound => ResolveError::PackageNotFound,
+        RepositoryError::Unknown(e) => ResolveError::RepositoryError(e.to_string()),
+    })?;
 
     Ok(if let Some(version) = version_name {
-        let latest_version = semver::get_latest(&version, &package.versions)
-            .ok_or(ResolveError::VersionNotFound)?;
+        let latest_version =
+            semver::get_latest(&version, &package.versions).ok_or(ResolveError::VersionNotFound)?;
 
         latest_version.uri.clone()
     } else {
         let mut versions = package.versions.clone();
         semver::sort_versions(&mut versions);
-        let latest_version = versions.last()
-            .ok_or(ResolveError::VersionNotFound)?;
-    
+        let latest_version = versions.last().ok_or(ResolveError::VersionNotFound)?;
+
         latest_version.uri.clone()
     })
 }
@@ -55,12 +51,12 @@ mod tests {
     use mockall::{mock, predicate::eq};
     use resolve_package::ResolveError;
 
-    use crate::{Repository, Package, RepositoryError, Version, resolving::resolve_package};
+    use crate::{resolving::resolve_package, Package, Repository, RepositoryError, Version};
 
     mock! {
-      PackageRepository {} 
+      PackageRepository {}
         #[async_trait]
-        impl Repository<Package> for PackageRepository { 
+        impl Repository<Package> for PackageRepository {
             async fn read(&self, key: &str) -> Result<Package, RepositoryError>;
             async fn update(&self, entity: &Package) -> Result<(), RepositoryError>;
         }
@@ -73,30 +69,30 @@ mod tests {
         let user = "user1";
         let package_name = "package1";
         let id = format!("{}/{}", user, package_name);
-        
+
         let expected_package = Package {
             id: id.clone(),
             user: user.to_string(),
             name: package_name.to_string(),
             versions: vec![
-                Version { 
-                    name: "1.0.0".to_string(), 
-                    uri: "uri1".to_string() 
+                Version {
+                    name: "1.0.0".to_string(),
+                    uri: "uri1".to_string(),
                 },
-                Version { 
-                    name: "2.0.0".to_string(), 
-                    uri: "uri2".to_string() 
+                Version {
+                    name: "2.0.0".to_string(),
+                    uri: "uri2".to_string(),
                 },
             ],
         };
 
-        mock_repo.expect_read()
+        mock_repo
+            .expect_read()
             .with(eq(id.clone()))
             .times(1)
             .returning(move |_| Ok(expected_package.clone()));
 
-        let result = resolve_package(&user, &package_name, None, &mock_repo)
-            .await;
+        let result = resolve_package(&user, &package_name, None, &mock_repo).await;
 
         assert_eq!(result, Ok("uri2".to_string()));
     }
@@ -114,24 +110,24 @@ mod tests {
             user: user.to_string(),
             name: package_name.to_string(),
             versions: vec![
-                Version { 
-                    name: "1.0.0".to_string(), 
-                    uri: "uri1".to_string() 
+                Version {
+                    name: "1.0.0".to_string(),
+                    uri: "uri1".to_string(),
                 },
-                Version { 
-                    name: "2.0.0".to_string(), 
-                    uri: "uri2".to_string() 
+                Version {
+                    name: "2.0.0".to_string(),
+                    uri: "uri2".to_string(),
                 },
             ],
         };
 
-        mock_repo.expect_read()
+        mock_repo
+            .expect_read()
             .with(eq(id.clone()))
             .times(1)
             .returning(move |_| Ok(expected_package.clone()));
 
-        let result = resolve_package(&user, &package_name, Some("2.0.0"), &mock_repo)
-            .await;
+        let result = resolve_package(&user, &package_name, Some("2.0.0"), &mock_repo).await;
 
         assert_eq!(result, Ok("uri2".to_string()));
     }
@@ -149,24 +145,24 @@ mod tests {
             user: user.to_string(),
             name: package_name.to_string(),
             versions: vec![
-                Version { 
-                    name: "1.0.0".to_string(), 
-                    uri: "uri1".to_string() 
+                Version {
+                    name: "1.0.0".to_string(),
+                    uri: "uri1".to_string(),
                 },
-                Version { 
-                    name: "2.0.0".to_string(), 
-                    uri: "uri2".to_string() 
+                Version {
+                    name: "2.0.0".to_string(),
+                    uri: "uri2".to_string(),
                 },
             ],
         };
 
-        mock_repo.expect_read()
+        mock_repo
+            .expect_read()
             .with(eq(id.clone()))
             .times(1)
             .returning(move |_| Ok(expected_package.clone()));
 
-        let result = resolve_package(&user, &package_name, Some("3.0.0"), &mock_repo)
-            .await;
+        let result = resolve_package(&user, &package_name, Some("3.0.0"), &mock_repo).await;
 
         assert_eq!(result, Err(ResolveError::VersionNotFound));
     }
@@ -179,13 +175,13 @@ mod tests {
         let package_name = "package1";
         let id = format!("{}/{}", user, package_name);
 
-        mock_repo.expect_read()
+        mock_repo
+            .expect_read()
             .with(eq(id.clone()))
             .times(1)
             .returning(move |_| Err(RepositoryError::NotFound));
 
-        let result = resolve_package(&user, &package_name, None, &mock_repo)
-            .await;
+        let result = resolve_package(&user, &package_name, None, &mock_repo).await;
 
         assert_eq!(result, Err(ResolveError::PackageNotFound));
     }
@@ -198,14 +194,17 @@ mod tests {
         let package_name = "package1";
         let id = format!("{}/{}", user, package_name);
 
-        mock_repo.expect_read()
+        mock_repo
+            .expect_read()
             .with(eq(id.clone()))
             .times(1)
             .returning(move |_| Err(RepositoryError::Unknown("Some error".to_string())));
 
-        let result = resolve_package(&user, &package_name, None, &mock_repo)
-            .await;
+        let result = resolve_package(&user, &package_name, None, &mock_repo).await;
 
-        assert_eq!(result, Err(ResolveError::RepositoryError("Some error".to_string())));
+        assert_eq!(
+            result,
+            Err(ResolveError::RepositoryError("Some error".to_string()))
+        );
     }
 }

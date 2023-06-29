@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
-use std::cmp::Ordering;
 use regex::Regex;
+use std::cmp::Ordering;
 
 type SemVer = (u32, u32, u32, Option<String>, Option<String>);
 
@@ -9,7 +9,7 @@ pub trait IVersion {
 }
 
 lazy_static! {
-    static ref SEMVER_REGEX: Regex = 
+    static ref SEMVER_REGEX: Regex =
         Regex::new(r"^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$").unwrap();
 }
 
@@ -27,7 +27,8 @@ pub fn compare_semver(a: &SemVer, b: &SemVer) -> Ordering {
 
 pub fn get_latest<'a, T: IVersion>(partial: &str, versions: &'a [T]) -> Option<&'a T> {
     let partial_parts: Vec<u32> = partial.split('.').map(|s| s.parse().unwrap()).collect();
-    versions.iter()
+    versions
+        .iter()
         .filter(|v| {
             if let Some(sem_ver) = parse_semver(&v.name()) {
                 partial_parts.iter().enumerate().all(|(i, &part)| match i {
@@ -86,24 +87,48 @@ mod tests {
 
     #[test]
     fn verify_should_return_true_for_valid_versions_and_false_for_invalid_versions() {
-        assert!(verify(&Version { name: "1.2.3".into() }));
-        assert!(verify(&Version { name: "1.2.3-alpha".into() }));
+        assert!(verify(&Version {
+            name: "1.2.3".into()
+        }));
+        assert!(verify(&Version {
+            name: "1.2.3-alpha".into()
+        }));
         assert!(!verify(&Version { name: "1.2".into() }));
-        assert!(verify(&Version { name: "1.2.3-alpha.1".into() }));
-        assert!(!verify(&Version { name: "a.b.c".into() }));
-        assert!(!verify(&Version { name: "1.2.3-".into() }));
-        assert!(!verify(&Version { name: "1.2.3+".into() }));
+        assert!(verify(&Version {
+            name: "1.2.3-alpha.1".into()
+        }));
+        assert!(!verify(&Version {
+            name: "a.b.c".into()
+        }));
+        assert!(!verify(&Version {
+            name: "1.2.3-".into()
+        }));
+        assert!(!verify(&Version {
+            name: "1.2.3+".into()
+        }));
     }
 
     #[test]
     fn get_latest_should_return_the_latest_version_object_for_a_given_version_prefix() {
         let version_objects = vec![
-            Version { name: "1.0.0".into() },
-            Version { name: "1.1.0".into() },
-            Version { name: "1.2.0".into() },
-            Version { name: "2.0.0".into() },
-            Version { name: "2.1.0".into() },
-            Version { name: "2.1.1".into() },
+            Version {
+                name: "1.0.0".into(),
+            },
+            Version {
+                name: "1.1.0".into(),
+            },
+            Version {
+                name: "1.2.0".into(),
+            },
+            Version {
+                name: "2.0.0".into(),
+            },
+            Version {
+                name: "2.1.0".into(),
+            },
+            Version {
+                name: "2.1.1".into(),
+            },
         ];
 
         assert_eq!(get_latest("1", &version_objects).unwrap().name(), "1.2.0");
@@ -114,26 +139,50 @@ mod tests {
     #[test]
     fn sort_versions_should_return_an_array_of_version_objects_sorted_in_ascending_order() {
         let mut unordered = vec![
-            Version { name: "1.0.0".into() },
-            Version { name: "2.0.0".into() },
-            Version { name: "1.2.0".into() },
-            Version { name: "2.1.0".into() },
-            Version { name: "1.1.0".into() },
-            Version { name: "2.1.1".into() },
+            Version {
+                name: "1.0.0".into(),
+            },
+            Version {
+                name: "2.0.0".into(),
+            },
+            Version {
+                name: "1.2.0".into(),
+            },
+            Version {
+                name: "2.1.0".into(),
+            },
+            Version {
+                name: "1.1.0".into(),
+            },
+            Version {
+                name: "2.1.1".into(),
+            },
         ];
         let expected_sorted = vec![
-            Version { name: "1.0.0".into() },
-            Version { name: "1.1.0".into() },
-            Version { name: "1.2.0".into() },
-            Version { name: "2.0.0".into() },
-            Version { name: "2.1.0".into() },
-            Version { name: "2.1.1".into() },
+            Version {
+                name: "1.0.0".into(),
+            },
+            Version {
+                name: "1.1.0".into(),
+            },
+            Version {
+                name: "1.2.0".into(),
+            },
+            Version {
+                name: "2.0.0".into(),
+            },
+            Version {
+                name: "2.1.0".into(),
+            },
+            Version {
+                name: "2.1.1".into(),
+            },
         ];
 
         sort_versions(&mut unordered);
 
         assert_eq!(
-            unordered.iter().map(|v| v.name()).collect::<Vec<_>>(), 
+            unordered.iter().map(|v| v.name()).collect::<Vec<_>>(),
             expected_sorted.iter().map(|v| v.name()).collect::<Vec<_>>()
         );
     }
