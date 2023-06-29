@@ -5,7 +5,7 @@ use aws_sdk_dynamodb::operation::get_item::{GetItemError, GetItemOutput};
 use aws_sdk_dynamodb::types::AttributeValue;
 use aws_sdk_dynamodb::Client;
 
-use crate::{Package, Repository, RepositoryError};
+use crate::{constants, Package, Repository, RepositoryError};
 
 pub struct PackageRepository {
     client: Client,
@@ -18,7 +18,6 @@ impl PackageRepository {
     }
 }
 
-const KEY_NAME: &'static str = "id";
 #[async_trait]
 impl Repository<Package> for PackageRepository {
     async fn read(&self, key: &str) -> Result<Package, RepositoryError> {
@@ -26,14 +25,17 @@ impl Repository<Package> for PackageRepository {
             .client
             .get_item()
             .table_name(&self.table_name)
-            .key(KEY_NAME, AttributeValue::S(key.to_string()))
+            .key(
+                constants::PACKAGES_TABLE_KEY_NAME,
+                AttributeValue::S(key.to_string()),
+            )
             .send()
             .await
             .map_err(|error| RepositoryError::Unknown(error.to_string()))?;
 
         let item = response.item.ok_or(RepositoryError::NotFound)?;
         let package_json = item
-            .get(KEY_NAME)
+            .get(constants::PACKAGES_TABLE_KEY_NAME)
             .and_then(|v| v.as_s().ok())
             .ok_or(RepositoryError::NotFound)?;
 
@@ -50,7 +52,7 @@ impl Repository<Package> for PackageRepository {
         self.client
             .put_item()
             .table_name(&self.table_name)
-            .item(KEY_NAME, AttributeValue::S(item))
+            .item(constants::PACKAGES_TABLE_KEY_NAME, AttributeValue::S(item))
             .send()
             .await
             .map_err(|error| RepositoryError::Unknown(error.to_string()))?;
