@@ -76,9 +76,7 @@ mod tests {
     use mockall::{mock, predicate::eq};
 
     use crate::{
-        package_name::PackageName,
         publishing::{publish_package, PublishError},
-        username::Username,
         Package, Repository, RepositoryError, Version,
     };
 
@@ -114,7 +112,7 @@ mod tests {
         package_repo
             .expect_read()
             .with(eq("user1/package1".to_string()))
-            .return_once(move |_| Ok(read_package.clone()));
+            .return_once(move |_| Ok(read_package));
 
         let package = package.clone();
         package_repo
@@ -155,7 +153,7 @@ mod tests {
             package_repo
                 .expect_read()
                 .with(eq("user1/package1".to_string()))
-                .return_once(move |_| Ok(package.clone()));
+                .return_once(move |_| Ok(package));
         }
 
         package_repo.expect_update().never();
@@ -191,7 +189,7 @@ mod tests {
             package_repo
                 .expect_read()
                 .with(eq("user1/package1".to_string()))
-                .return_once(move |_| Ok(package.clone()));
+                .return_once(move |_| Ok(package));
         }
         package_repo.expect_update().never();
 

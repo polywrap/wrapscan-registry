@@ -38,10 +38,7 @@ mod tests {
     use axum::{extract::Path, http::StatusCode, Json};
     use mockall::{mock, predicate::eq};
 
-    use crate::{
-        functions::resolve, package_name::PackageName, username::Username, Package, Repository,
-        RepositoryError, UriResponse, Version,
-    };
+    use crate::{functions::resolve, Package, Repository, RepositoryError, UriResponse, Version};
 
     mock! {
       PackageRepository {}
@@ -79,7 +76,7 @@ mod tests {
         package_repo
             .expect_read()
             .with(eq("user1/package1".to_string()))
-            .return_once(move |_| Ok(package.clone()));
+            .return_once(move |_| Ok(package));
 
         let result = resolve(Path(("user1".into(), "package1".into())), package_repo).await;
 
@@ -119,7 +116,7 @@ mod tests {
         package_repo
             .expect_read()
             .with(eq("user1/package1".to_string()))
-            .return_once(move |_| Ok(package.clone()));
+            .return_once(move |_| Ok(package));
 
         let result = resolve(
             Path(("user1".into(), "package1@1.0.1".into())),
@@ -167,7 +164,7 @@ mod tests {
         package_repo
             .expect_read()
             .with(eq("user1/package1".to_string()))
-            .return_once(move |_| Ok(package.clone()));
+            .return_once(move |_| Ok(package));
 
         let result = resolve(
             Path(("user1".into(), "package1@2.0.0".into())),

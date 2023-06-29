@@ -27,7 +27,7 @@ pub async fn publish_latest_version(
     }
 
     package_repo
-        .update(&package)
+        .update(package)
         .await
         .map_err(|e| PublishError::RepositoryError(e.to_string()))?;
 
@@ -40,9 +40,7 @@ mod tests {
     use mockall::{mock, predicate::eq};
 
     use crate::{
-        package_name::PackageName,
         publishing::{publish_latest_version, PublishError},
-        username::Username,
         Package, Repository, RepositoryError, Version,
     };
 

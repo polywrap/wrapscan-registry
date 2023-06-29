@@ -44,7 +44,7 @@ pub fn get_latest<'a, T: IVersion>(partial: &str, versions: &'a [T]) -> Option<&
         .max_by_key(|v| parse_semver(&v.name()))
 }
 
-pub fn sort_versions<T: IVersion>(versions: &mut Vec<T>) {
+pub fn sort_versions<T: IVersion>(versions: &mut [T]) {
     versions.sort_by(|a, b| {
         let a_semver = parse_semver(&a.name());
         let b_semver = parse_semver(&b.name());

@@ -14,16 +14,16 @@ pub async fn resolve_package(
 
     let package = package_repo.read(&id).await.map_err(|error| match error {
         RepositoryError::NotFound => ResolveError::PackageNotFound,
-        RepositoryError::Unknown(e) => ResolveError::RepositoryError(e.to_string()),
+        RepositoryError::Unknown(e) => ResolveError::RepositoryError(e),
     })?;
 
     Ok(if let Some(version) = version_name {
         let latest_version =
-            semver::get_latest(&version, &package.versions).ok_or(ResolveError::VersionNotFound)?;
+            semver::get_latest(version, &package.versions).ok_or(ResolveError::VersionNotFound)?;
 
         latest_version.uri.clone()
     } else {
-        let mut versions = package.versions.clone();
+        let mut versions = package.versions;
         semver::sort_versions(&mut versions);
         let latest_version = versions.last().ok_or(ResolveError::VersionNotFound)?;
 

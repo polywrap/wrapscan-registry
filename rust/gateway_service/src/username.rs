@@ -28,7 +28,7 @@ impl FromStr for Username {
 
         let re = Regex::new(r"^[a-zA-Z0-9_]*$").unwrap();
 
-        if !re.is_match(&name) {
+        if !re.is_match(name) {
             return Err(&UsernameParseError {});
         }
 
@@ -42,17 +42,17 @@ mod tests {
 
     #[test]
     fn validate_username() {
-        assert_eq!("te".parse::<Username>().is_ok(), false);
-        assert_eq!("t1234567890123456789".parse::<Username>().is_ok(), true);
-        assert_eq!("t12345678901234567890".parse::<Username>().is_ok(), false);
-        assert_eq!("test".parse::<Username>().is_ok(), true);
-        assert_eq!("test-123".parse::<Username>().is_ok(), false);
-        assert_eq!("test_123".parse::<Username>().is_ok(), true);
-        assert_eq!("TEST-123_abc".parse::<Username>().is_ok(), false);
-        assert_eq!("test-123_abc-xyz".parse::<Username>().is_ok(), false);
-        assert_eq!("test-123_abc-xyz-".parse::<Username>().is_ok(), false);
-        assert_eq!("test-123_abc-xyz+".parse::<Username>().is_ok(), false);
-        assert_eq!("test/a".parse::<Username>().is_ok(), false);
-        assert_eq!("test@a".parse::<Username>().is_ok(), false);
+        assert!("te".parse::<Username>().is_err());
+        assert!("t1234567890123456789".parse::<Username>().is_ok());
+        assert!("t12345678901234567890".parse::<Username>().is_err());
+        assert!("test".parse::<Username>().is_ok());
+        assert!("test-123".parse::<Username>().is_err());
+        assert!("test_123".parse::<Username>().is_ok());
+        assert!("TEST-123_abc".parse::<Username>().is_err());
+        assert!("test-123_abc-xyz".parse::<Username>().is_err());
+        assert!("test-123_abc-xyz-".parse::<Username>().is_err());
+        assert!("test-123_abc-xyz+".parse::<Username>().is_err());
+        assert!("test/a".parse::<Username>().is_err());
+        assert!("test@a".parse::<Username>().is_err());
     }
 }

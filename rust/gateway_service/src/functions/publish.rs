@@ -69,7 +69,7 @@ fn get_api_key(headers: HeaderMap) -> Result<String, StatusCode> {
     // Decode the api key
     let api_key = base64::decode(api_key).map_err(|_| StatusCode::UNAUTHORIZED)?;
 
-    Ok(String::from_utf8(api_key).map_err(|_| StatusCode::UNAUTHORIZED)?)
+    String::from_utf8(api_key).map_err(|_| StatusCode::UNAUTHORIZED)
 }
 
 #[cfg(test)]
@@ -83,9 +83,8 @@ mod tests {
     use mockall::{mock, predicate::eq};
 
     use crate::{
-        account_service, functions::publish, package_name::PackageName, routes::UriBody,
-        username::Username, AccountService, KeyValidationError, Package, Repository,
-        RepositoryError, Version,
+        functions::publish, routes::UriBody, username::Username, AccountService,
+        KeyValidationError, Package, Repository, RepositoryError, Version,
     };
 
     mock! {
@@ -135,7 +134,7 @@ mod tests {
             package_repo
                 .expect_read()
                 .with(eq("user1/package1".to_string()))
-                .return_once(move |_| Ok(package.clone()));
+                .return_once(move |_| Ok(package));
         }
         {
             let package = package.clone();
