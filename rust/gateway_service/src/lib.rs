@@ -11,13 +11,17 @@ pub use models::*;
 mod functions;
 pub use functions::*;
 
-mod publishing;
-
 mod setup_logging;
 pub use setup_logging::*;
 
 mod semver;
 pub use semver::*;
+
+mod publishing;
+use publishing::*;
+
+mod resolving;
+use resolving::*;
 
 mod extract_package_and_version;
 use extract_package_and_version::extract_package_and_version;
