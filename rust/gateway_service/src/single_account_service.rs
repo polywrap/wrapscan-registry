@@ -15,7 +15,11 @@ impl SingleAccountService {
 
 #[async_trait]
 impl AccountService for SingleAccountService {
-    async fn verify_user_key(&self, user: &Username, api_key: &str) -> Result<(), KeyValidationError> {
+    async fn verify_user_key(
+        &self,
+        user: &Username,
+        api_key: &str,
+    ) -> Result<(), KeyValidationError> {
         if &self.username == user && self.api_key == api_key {
             Ok(())
         } else {
