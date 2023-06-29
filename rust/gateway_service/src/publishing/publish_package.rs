@@ -1,3 +1,5 @@
+use crate::package_name::PackageName;
+use crate::username::Username;
 use crate::{semver, Package, PartialVersion, Repository, RepositoryError, Version};
 
 use super::error::PublishError;
@@ -9,8 +11,8 @@ async fn verify_user_key(api_key: &str) -> bool {
 use super::publish_latest_version;
 
 pub async fn publish_package(
-    user: &str,
-    package_name: &str,
+    user: &Username,
+    package_name: &PackageName,
     version_name: Option<&str>,
     uri: String,
     package_repo: impl Repository<Package>,
@@ -53,8 +55,8 @@ pub async fn publish_package(
     } else {
         Package {
             id: id.clone(),
-            name: package_name.to_string(),
-            user: user.to_string(),
+            name: package_name.clone(),
+            user: user.clone(),
             versions: vec![],
         }
     };
@@ -81,7 +83,7 @@ mod tests {
 
     use crate::{
         publishing::{publish_package, PublishError},
-        Package, Repository, RepositoryError, Version,
+        Package, Repository, RepositoryError, Version, username::Username, package_name::PackageName,
     };
 
     mock! {
@@ -97,8 +99,8 @@ mod tests {
     async fn can_publish_version() {
         let package = Package {
             id: "user1/package1".into(),
-            name: "package1".into(),
-            user: "user1".into(),
+            name: PackageName::try_from("package1".to_string()).unwrap(),
+            user: Username::try_from("user1".to_string()).unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "uri1".into(),
@@ -127,8 +129,8 @@ mod tests {
             .return_once(move |_| Ok(()));
 
         let result = publish_package(
-            "user1",
-            "package1",
+            &package.user,
+            &package.name,
             Some("2.0.0"),
             "uri2".into(),
             package_repo,
@@ -142,8 +144,8 @@ mod tests {
     async fn forbids_publishing_duplicate_version() {
         let package = Package {
             id: "user1/package1".into(),
-            name: "package1".into(),
-            user: "user1".into(),
+            name: PackageName::try_from("package1".to_string()).unwrap(),
+            user: Username::try_from("user1".to_string()).unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "uri1".into(),
@@ -152,16 +154,19 @@ mod tests {
 
         let mut package_repo = MockPackageRepository::new();
 
-        package_repo
-            .expect_read()
-            .with(eq("user1/package1".to_string()))
-            .return_once(move |_| Ok(package.clone()));
-
+        {
+            let package = package.clone();
+            package_repo
+                .expect_read()
+                .with(eq("user1/package1".to_string()))
+                .return_once(move |_| Ok(package.clone()));
+        }
+        
         package_repo.expect_update().never();
 
         let result = publish_package(
-            "user1",
-            "package1",
+            &package.user,
+            &package.name,
             Some("1.0.0"),
             "uri2".into(),
             package_repo,
@@ -175,8 +180,8 @@ mod tests {
     async fn forbids_publishing_invalid_version() {
         let package = Package {
             id: "user1/package1".into(),
-            name: "package1".into(),
-            user: "user1".into(),
+            name: PackageName::try_from("package1".to_string()).unwrap(),
+            user: Username::try_from("user1".to_string()).unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "uri1".into(),
@@ -185,16 +190,18 @@ mod tests {
 
         let mut package_repo = MockPackageRepository::new();
 
-        package_repo
-            .expect_read()
-            .with(eq("user1/package1".to_string()))
-            .return_once(move |_| Ok(package.clone()));
-
+        {
+            let package = package.clone();
+            package_repo
+                .expect_read()
+                .with(eq("user1/package1".to_string()))
+                .return_once(move |_| Ok(package.clone()));
+        }
         package_repo.expect_update().never();
 
         let result = publish_package(
-            "user1",
-            "package1",
+            &package.user,
+            &package.name,
             Some("1.0.0a"),
             "uri2".into(),
             package_repo,

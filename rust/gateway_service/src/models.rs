@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use crate::IVersion;
+use crate::{IVersion, username::Username, package_name::PackageName};
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Package {
     pub id: String,
-    pub user: String,
-    pub name: String,
+    pub user: Username,
+    pub name: PackageName,
     pub versions: Vec<Version>,
 }
 

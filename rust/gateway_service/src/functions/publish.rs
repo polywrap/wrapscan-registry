@@ -1,7 +1,7 @@
 use axum::{body::BoxBody, extract::Path, http::StatusCode, response::Response, Json};
 
 use crate::{
-    extract_package_and_version, publishing::publish_package, routes::UriBody, Package, Repository,
+    extract_package_and_version, publishing::publish_package, routes::UriBody, Package, Repository, username::Username, package_name::PackageName,
 };
 
 pub async fn publish(
@@ -9,11 +9,11 @@ pub async fn publish(
     Json(body): Json<UriBody>,
     package_repo: impl Repository<Package>,
 ) -> Result<Response, StatusCode> {
-    let (package_name, version_name) = extract_package_and_version(&package_and_version);
+    let (username, package_name, version_name) = build_username_package_and_version(user, &package_and_version)?;
 
     let uri = body.uri;
 
-    publish_package(&user, package_name, version_name, uri, package_repo)
+    publish_package(&username, &package_name, version_name, uri, package_repo)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
@@ -25,6 +25,18 @@ pub async fn publish(
     Ok(response)
 }
 
+fn build_username_package_and_version(user: String, package_and_version: &str) -> Result<(Username, PackageName, Option<&str>), StatusCode> {
+    let username = Username::try_from(user)
+        .map_err(|_| StatusCode::BAD_REQUEST)?;
+
+    let (package_name, version_name) = extract_package_and_version(&package_and_version);
+
+    let package_name = PackageName::try_from(package_name.to_string())
+        .map_err(|_| StatusCode::BAD_REQUEST)?;
+
+    Ok((username, package_name, version_name))
+}
+
 #[cfg(test)]
 mod tests {
     use async_trait::async_trait;
@@ -32,7 +44,7 @@ mod tests {
     use mockall::{mock, predicate::eq};
 
     use crate::{
-        functions::publish, routes::UriBody, Package, Repository, RepositoryError, Version,
+        functions::publish, routes::UriBody, Package, Repository, RepositoryError, Version, username::Username, package_name::PackageName,
     };
 
     mock! {
@@ -48,8 +60,8 @@ mod tests {
     async fn publish_version() {
         let package = Package {
             id: "user1/package1".into(),
-            name: "package1".into(),
-            user: "user1".into(),
+            name: PackageName::try_from("package1".to_string()).unwrap(),
+            user: Username::try_from("user1".to_string()).unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "uri1".into(),

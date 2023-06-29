@@ -41,7 +41,7 @@ mod tests {
 
     use crate::{
         publishing::{publish_latest_version, PublishError},
-        Package, Repository, RepositoryError, Version,
+        Package, Repository, RepositoryError, Version, package_name::PackageName, username::Username,
     };
 
     mock! {
@@ -57,15 +57,15 @@ mod tests {
     async fn can_publish_latest_version_when_no_versions_published() {
         let mut package = Package {
             id: "user1/package1".into(),
-            name: "package1".into(),
-            user: "user1".into(),
+            name: PackageName::try_from("package1".to_string()).unwrap(),
+            user: Username::try_from("user1".to_string()).unwrap(),
             versions: vec![],
         };
 
         let update_package = Package {
             id: "user1/package1".into(),
-            name: "package1".into(),
-            user: "user1".into(),
+            name: PackageName::try_from("package1".to_string()).unwrap(),
+            user: Username::try_from("user1".to_string()).unwrap(),
             versions: vec![Version {
                 name: "latest".into(),
                 uri: "uri_latest".into(),
@@ -102,8 +102,8 @@ mod tests {
     async fn can_publish_latest_version_when_latest_already_published() {
         let mut package = Package {
             id: "user1/package1".into(),
-            name: "package1".into(),
-            user: "user1".into(),
+            name: PackageName::try_from("package1".to_string()).unwrap(),
+            user: Username::try_from("user1".to_string()).unwrap(),
             versions: vec![Version {
                 name: "latest".into(),
                 uri: "uri1".into(),
@@ -112,8 +112,8 @@ mod tests {
 
         let update_package = Package {
             id: "user1/package1".into(),
-            name: "package1".into(),
-            user: "user1".into(),
+            name: PackageName::try_from("package1".to_string()).unwrap(),
+            user: Username::try_from("user1".to_string()).unwrap(),
             versions: vec![Version {
                 name: "latest".into(),
                 uri: "uri_latest".into(),
@@ -150,8 +150,8 @@ mod tests {
     async fn can_publish_latest_version_when_one_already_published() {
         let mut package = Package {
             id: "user1/package1".into(),
-            name: "package1".into(),
-            user: "user1".into(),
+            name: PackageName::try_from("package1".to_string()).unwrap(),
+            user: Username::try_from("user1".to_string()).unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "uri1".into(),
@@ -171,8 +171,8 @@ mod tests {
     async fn can_publish_latest_version_when_multiple_already_published() {
         let mut package = Package {
             id: "user1/package1".into(),
-            name: "package1".into(),
-            user: "user1".into(),
+            name: PackageName::try_from("package1".to_string()).unwrap(),
+            user: Username::try_from("user1".to_string()).unwrap(),
             versions: vec![
                 Version {
                     name: "1.0.0".into(),
@@ -198,15 +198,15 @@ mod tests {
     async fn publish_latest_version_fails_when_unknown_repository_error() {
         let mut package = Package {
             id: "user1/package1".into(),
-            name: "package1".into(),
-            user: "user1".into(),
+            name: PackageName::try_from("package1".to_string()).unwrap(),
+            user: Username::try_from("user1".to_string()).unwrap(),
             versions: vec![],
         };
 
         let update_package = Package {
             id: "user1/package1".into(),
-            name: "package1".into(),
-            user: "user1".into(),
+            name: PackageName::try_from("package1".to_string()).unwrap(),
+            user: Username::try_from("user1".to_string()).unwrap(),
             versions: vec![Version {
                 name: "latest".into(),
                 uri: "uri_latest".into(),

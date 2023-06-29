@@ -25,7 +25,10 @@ use resolving::*;
 mod extract_package_and_version;
 use extract_package_and_version::extract_package_and_version;
 
-mod validate_package_name;
-use validate_package_name::validate_package_name;
+mod username;
+use username::*;
+
+mod package_name;
+use package_name::*;
 
 mod constants;

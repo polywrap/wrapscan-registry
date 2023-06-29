@@ -1,19 +1,20 @@
 use std::fmt::Display;
 
-use crate::{semver, Package, Repository, RepositoryError};
+use crate::{semver, Package, Repository, RepositoryError, package_name::PackageName, username::Username};
 
 pub async fn resolve_package(
-    user: &str,
-    package_name: &str,
+    user: &Username,
+    package_name: &PackageName,
     version_name: Option<&str>,
     package_repo: &impl Repository<Package>,
 ) -> Result<String, ResolveError> {
     let id = format!("{}/{}", user, package_name);
 
-    let package = package_repo.read(&id).await.map_err(|error| match error {
-        RepositoryError::NotFound => ResolveError::PackageNotFound,
-        RepositoryError::Unknown(e) => ResolveError::RepositoryError(e.to_string()),
-    })?;
+    let package = package_repo.read(&id).await
+        .map_err(|error| match error {
+            RepositoryError::NotFound => ResolveError::PackageNotFound,
+            RepositoryError::Unknown(e) => ResolveError::RepositoryError(e.to_string()),
+        })?;
 
     Ok(if let Some(version) = version_name {
         let latest_version =
@@ -51,7 +52,7 @@ mod tests {
     use mockall::{mock, predicate::eq};
     use resolve_package::ResolveError;
 
-    use crate::{resolving::resolve_package, Package, Repository, RepositoryError, Version};
+    use crate::{resolving::resolve_package, Package, Repository, RepositoryError, Version, username::Username, package_name::PackageName};
 
     mock! {
       PackageRepository {}
@@ -66,14 +67,14 @@ mod tests {
     async fn can_resolve_package() {
         let mut mock_repo = MockPackageRepository::new();
 
-        let user = "user1";
-        let package_name = "package1";
+        let user = Username::try_from("user1".to_string()).unwrap();
+        let package_name = PackageName::try_from("package1".to_string()).unwrap();
         let id = format!("{}/{}", user, package_name);
 
         let expected_package = Package {
             id: id.clone(),
-            user: user.to_string(),
-            name: package_name.to_string(),
+            user: user.clone(),
+            name: package_name.clone(),
             versions: vec![
                 Version {
                     name: "1.0.0".to_string(),
@@ -101,14 +102,14 @@ mod tests {
     async fn resolves_package_with_specified_version() {
         let mut mock_repo = MockPackageRepository::new();
 
-        let user = "user1";
-        let package_name = "package1";
+        let user = Username::try_from("user1".to_string()).unwrap();
+        let package_name = PackageName::try_from("package1".to_string()).unwrap();
         let id = format!("{}/{}", user, package_name);
 
         let expected_package = Package {
             id: id.clone(),
-            user: user.to_string(),
-            name: package_name.to_string(),
+            user: user.clone(),
+            name: package_name.clone(),
             versions: vec![
                 Version {
                     name: "1.0.0".to_string(),
@@ -136,14 +137,14 @@ mod tests {
     async fn returns_version_not_found_error_when_resolving_package_with_non_existent_version() {
         let mut mock_repo = MockPackageRepository::new();
 
-        let user = "user1";
-        let package_name = "package1";
+        let user = Username::try_from("user1".to_string()).unwrap();
+        let package_name = PackageName::try_from("package1".to_string()).unwrap();
         let id = format!("{}/{}", user, package_name);
 
         let expected_package = Package {
             id: id.clone(),
-            user: user.to_string(),
-            name: package_name.to_string(),
+            user: user.clone(),
+            name: package_name.clone(),
             versions: vec![
                 Version {
                     name: "1.0.0".to_string(),
@@ -171,8 +172,8 @@ mod tests {
     async fn returns_package_not_found_when_resolving_non_existent_package() {
         let mut mock_repo = MockPackageRepository::new();
 
-        let user = "user1";
-        let package_name = "package1";
+        let user = Username::try_from("user1".to_string()).unwrap();
+        let package_name = PackageName::try_from("package1".to_string()).unwrap();
         let id = format!("{}/{}", user, package_name);
 
         mock_repo
@@ -190,8 +191,8 @@ mod tests {
     async fn returns_repository_error_when_resolving_package_with_repository_error() {
         let mut mock_repo = MockPackageRepository::new();
 
-        let user = "user1";
-        let package_name = "package1";
+        let user = Username::try_from("user1".to_string()).unwrap();
+        let package_name = PackageName::try_from("package1".to_string()).unwrap();
         let id = format!("{}/{}", user, package_name);
 
         mock_repo
