@@ -41,7 +41,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_validate_user_name() {
+    fn validate_username() {
+        assert_eq!("te".parse::<Username>().is_ok(), false);
+        assert_eq!("t1234567890123456789".parse::<Username>().is_ok(), true);
+        assert_eq!("t12345678901234567890".parse::<Username>().is_ok(), false);
         assert_eq!("test".parse::<Username>().is_ok(), true);
         assert_eq!("test-123".parse::<Username>().is_ok(), false);
         assert_eq!("test_123".parse::<Username>().is_ok(), true);

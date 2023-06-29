@@ -41,7 +41,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_validate_package_name() {
+    fn validate_package_name() {
+        assert_eq!("te".parse::<PackageName>().is_ok(), false);
+        assert_eq!("t1234567890123456789".parse::<PackageName>().is_ok(), true);
+        assert_eq!("t12345678901234567890".parse::<PackageName>().is_ok(), false);
         assert_eq!("test".parse::<PackageName>().is_ok(), true);
         assert_eq!("test-123".parse::<PackageName>().is_ok(), true);
         assert_eq!("test_123".parse::<PackageName>().is_ok(), true);

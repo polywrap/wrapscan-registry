@@ -1,8 +1,8 @@
 use axum::{body::BoxBody, extract::Path, http::StatusCode, response::Response};
 
 use crate::{
-    constants, extract_package_and_version, package_name::PackageName, resolve_package,
-    resolving::ResolveError, username::Username, Package, Repository,
+    constants, get_username_package_and_version, resolve_package, resolving::ResolveError, Package,
+    Repository,
 };
 
 pub async fn resolve(
@@ -10,7 +10,7 @@ pub async fn resolve(
     package_repo: impl Repository<Package>,
 ) -> Result<Response, StatusCode> {
     let (username, package_name, version_name) =
-        build_username_package_and_version(user, &package_and_version)?;
+        get_username_package_and_version(user, &package_and_version)?;
 
     let uri = resolve_package(&username, &package_name, version_name, &package_repo)
         .await
@@ -30,19 +30,6 @@ pub async fn resolve(
         .unwrap();
 
     Ok(response)
-}
-
-fn build_username_package_and_version(
-    user: String,
-    package_and_version: &str,
-) -> Result<(Username, PackageName, Option<&str>), StatusCode> {
-    let username = user.parse().map_err(|_| StatusCode::BAD_REQUEST)?;
-
-    let (package_name, version_name) = extract_package_and_version(&package_and_version);
-
-    let package_name = package_name.parse().map_err(|_| StatusCode::BAD_REQUEST)?;
-
-    Ok((username, package_name, version_name))
 }
 
 #[cfg(test)]

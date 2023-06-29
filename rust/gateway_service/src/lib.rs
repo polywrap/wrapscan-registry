@@ -26,10 +26,8 @@ mod extract_package_and_version;
 use extract_package_and_version::extract_package_and_version;
 
 mod username;
-use username::*;
 
 mod package_name;
-use package_name::*;
 
 mod constants;
 
@@ -38,3 +36,6 @@ pub use account_service::*;
 
 mod remote_account_service;
 pub use remote_account_service::RemoteAccountService;
+
+mod get_username_package_and_version;
+pub use get_username_package_and_version::get_username_package_and_version;

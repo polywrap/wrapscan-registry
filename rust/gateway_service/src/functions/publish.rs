@@ -7,11 +7,9 @@ use axum::{
 };
 
 use crate::{
-    extract_package_and_version,
-    package_name::PackageName,
+    get_username_package_and_version,
     publishing::{publish_package, PublishError},
     routes::UriBody,
-    username::Username,
     AccountService, KeyValidationError, Package, Repository,
 };
 
@@ -23,7 +21,7 @@ pub async fn publish(
     account_service: impl AccountService,
 ) -> Result<Response, StatusCode> {
     let (username, package_name, version_name) =
-        build_username_package_and_version(user, &package_and_version)?;
+        get_username_package_and_version(user, &package_and_version)?;
 
     let api_key = get_api_key(headers)?;
 
@@ -56,19 +54,6 @@ pub async fn publish(
         .unwrap();
 
     Ok(response)
-}
-
-fn build_username_package_and_version(
-    user: String,
-    package_and_version: &str,
-) -> Result<(Username, PackageName, Option<&str>), StatusCode> {
-    let username = user.parse().map_err(|_| StatusCode::BAD_REQUEST)?;
-
-    let (package_name, version_name) = extract_package_and_version(&package_and_version);
-
-    let package_name = package_name.parse().map_err(|_| StatusCode::BAD_REQUEST)?;
-
-    Ok((username, package_name, version_name))
 }
 
 fn get_api_key(headers: HeaderMap) -> Result<String, StatusCode> {
