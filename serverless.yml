@@ -19,8 +19,7 @@ provider:
             - Fn::GetAtt: [ packagesTable, Arn ]
   environment:
     PACKAGES_TABLE: ${self:custom.packagesTable}
-    WRAPPERS_GATEWAY_ADMIN_KEY: ${self:custom.wrappersGatewayAdminKey.wrappers_gateway_admin_key}
-    ACCOUNT_SERVICE_URI: https://accounts.wrappers.dev
+    WRAP_USER_KEY: ${self:custom.wrap_user.api_key}
 
 package: 
   individually: true
@@ -45,7 +44,7 @@ custom:
       heapMax: 1g
       migrate: true
   packagesTable: 'wraps-table-${sls:stage}'
-  wrappersGatewayAdminKey: ${ssm:/aws/reference/secretsmanager/wrappers-gateway-admin-key}
+  wrap_user: ${ssm:/aws/reference/secretsmanager/dev/wrapscan/wrap_user}
 
 plugins:
   - serverless-domain-manager

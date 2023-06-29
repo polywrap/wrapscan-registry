@@ -11,7 +11,7 @@ use lambda_http::{run, Error as HttpError};
 
 use crate::{
     constants, dynamodb::PackageRepository, functions, setup_logging, AccountService, Package,
-    RemoteAccountService, Repository,
+    RemoteAccountService, Repository, SingleAccountService,
 };
 
 pub async fn setup_routes() -> Result<(), HttpError> {
@@ -42,7 +42,7 @@ async fn publish_package(
     body: Json<UriBody>,
 ) -> Result<Response, StatusCode> {
     let package_repo = get_package_repository().await;
-    let account_service = get_account_service().await;
+    let account_service = get_wrap_account_service().await;
 
     functions::publish(path, body, headers, package_repo, account_service).await
 }
@@ -58,7 +58,14 @@ async fn get_package_repository() -> impl Repository<Package> {
     PackageRepository::new(client, table_name)
 }
 
-async fn get_account_service() -> impl AccountService {
+async fn get_wrap_account_service() -> impl AccountService {
+    SingleAccountService::new(
+        "wrap".parse().unwrap(),
+        std::env::var(constants::ENV_WRAP_USER_KEY).expect("ENV_WRAP_USER_KEY not set"),
+    )
+}
+
+async fn _get_remote_account_service() -> impl AccountService {
     RemoteAccountService::new(
         std::env::var(constants::ENV_ACCOUNT_SERVICE_URL).expect("ENV_ACCOUNT_SERVICE_URL not set"),
     )
