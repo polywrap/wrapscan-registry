@@ -21,6 +21,9 @@ impl Display for KeyValidationError {
 
 #[async_trait]
 pub trait AccountService {
-    async fn verify_user_key(&self, username: &Username, key: &str) -> Result<(), KeyValidationError>;
+    async fn verify_user_key(
+        &self,
+        username: &Username,
+        key: &str,
+    ) -> Result<(), KeyValidationError>;
 }
-

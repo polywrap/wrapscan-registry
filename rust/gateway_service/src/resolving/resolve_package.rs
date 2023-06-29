@@ -1,6 +1,8 @@
 use std::fmt::Display;
 
-use crate::{semver, Package, Repository, RepositoryError, package_name::PackageName, username::Username};
+use crate::{
+    package_name::PackageName, semver, username::Username, Package, Repository, RepositoryError,
+};
 
 pub async fn resolve_package(
     user: &Username,
@@ -10,11 +12,10 @@ pub async fn resolve_package(
 ) -> Result<String, ResolveError> {
     let id = format!("{}/{}", user, package_name);
 
-    let package = package_repo.read(&id).await
-        .map_err(|error| match error {
-            RepositoryError::NotFound => ResolveError::PackageNotFound,
-            RepositoryError::Unknown(e) => ResolveError::RepositoryError(e.to_string()),
-        })?;
+    let package = package_repo.read(&id).await.map_err(|error| match error {
+        RepositoryError::NotFound => ResolveError::PackageNotFound,
+        RepositoryError::Unknown(e) => ResolveError::RepositoryError(e.to_string()),
+    })?;
 
     Ok(if let Some(version) = version_name {
         let latest_version =
@@ -52,7 +53,10 @@ mod tests {
     use mockall::{mock, predicate::eq};
     use resolve_package::ResolveError;
 
-    use crate::{resolving::resolve_package, Package, Repository, RepositoryError, Version, username::Username, package_name::PackageName};
+    use crate::{
+        package_name::PackageName, resolving::resolve_package, username::Username, Package,
+        Repository, RepositoryError, Version,
+    };
 
     mock! {
       PackageRepository {}

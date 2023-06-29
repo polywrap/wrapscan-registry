@@ -1,7 +1,18 @@
-use axum::{body::BoxBody, extract::Path, http::{StatusCode, HeaderMap}, response::Response, Json};
+use axum::{
+    body::BoxBody,
+    extract::Path,
+    http::{HeaderMap, StatusCode},
+    response::Response,
+    Json,
+};
 
 use crate::{
-    extract_package_and_version, publishing::{publish_package, PublishError}, routes::UriBody, Package, Repository, username::Username, package_name::PackageName, AccountService, KeyValidationError,
+    extract_package_and_version,
+    package_name::PackageName,
+    publishing::{publish_package, PublishError},
+    routes::UriBody,
+    username::Username,
+    AccountService, KeyValidationError, Package, Repository,
 };
 
 pub async fn publish(
@@ -11,7 +22,8 @@ pub async fn publish(
     package_repo: impl Repository<Package>,
     account_service: impl AccountService,
 ) -> Result<Response, StatusCode> {
-    let (username, package_name, version_name) = build_username_package_and_version(user, &package_and_version)?;
+    let (username, package_name, version_name) =
+        build_username_package_and_version(user, &package_and_version)?;
 
     let api_key = get_api_key(headers)?;
 
@@ -46,14 +58,15 @@ pub async fn publish(
     Ok(response)
 }
 
-fn build_username_package_and_version(user: String, package_and_version: &str) -> Result<(Username, PackageName, Option<&str>), StatusCode> {
-    let username = user.parse()
-        .map_err(|_| StatusCode::BAD_REQUEST)?;
+fn build_username_package_and_version(
+    user: String,
+    package_and_version: &str,
+) -> Result<(Username, PackageName, Option<&str>), StatusCode> {
+    let username = user.parse().map_err(|_| StatusCode::BAD_REQUEST)?;
 
     let (package_name, version_name) = extract_package_and_version(&package_and_version);
 
-    let package_name = package_name.parse()
-        .map_err(|_| StatusCode::BAD_REQUEST)?;
+    let package_name = package_name.parse().map_err(|_| StatusCode::BAD_REQUEST)?;
 
     Ok((username, package_name, version_name))
 }
@@ -69,21 +82,25 @@ fn get_api_key(headers: HeaderMap) -> Result<String, StatusCode> {
         .to_string();
 
     // Decode the api key
-    let api_key = base64::decode(api_key)
-        .map_err(|_| StatusCode::UNAUTHORIZED)?;
+    let api_key = base64::decode(api_key).map_err(|_| StatusCode::UNAUTHORIZED)?;
 
-    Ok(String::from_utf8(api_key)
-        .map_err(|_| StatusCode::UNAUTHORIZED)?)
+    Ok(String::from_utf8(api_key).map_err(|_| StatusCode::UNAUTHORIZED)?)
 }
 
 #[cfg(test)]
 mod tests {
     use async_trait::async_trait;
-    use axum::{extract::Path, http::{StatusCode, HeaderMap}, Json};
+    use axum::{
+        extract::Path,
+        http::{HeaderMap, StatusCode},
+        Json,
+    };
     use mockall::{mock, predicate::eq};
 
     use crate::{
-        functions::publish, routes::UriBody, Package, Repository, RepositoryError, Version, username::Username, package_name::PackageName, AccountService, KeyValidationError, account_service,
+        account_service, functions::publish, package_name::PackageName, routes::UriBody,
+        username::Username, AccountService, KeyValidationError, Package, Repository,
+        RepositoryError, Version,
     };
 
     mock! {
@@ -95,7 +112,7 @@ mod tests {
         }
     }
 
-    mock!{
+    mock! {
         AccountService {}
         #[async_trait]
         impl AccountService for AccountService {
@@ -127,7 +144,7 @@ mod tests {
             .expect_verify_user_key()
             .with(eq(package.user.clone()), eq("key1"))
             .return_once(|_, _| Ok(()));
-        
+
         {
             let package = package.clone();
             package_repo
@@ -147,14 +164,19 @@ mod tests {
 
         let body: Json<UriBody> = Json(UriBody { uri: "uri2".into() });
         let mut headers = HeaderMap::new();
-        headers.insert("Authorization", format!("Bearer {}", base64::encode("key1")).parse().unwrap());
+        headers.insert(
+            "Authorization",
+            format!("Bearer {}", base64::encode("key1"))
+                .parse()
+                .unwrap(),
+        );
 
         let result = publish(
             Path(("user1".into(), "package1@2.0.0".into())),
             body,
             headers,
             package_repo,
-            account_service
+            account_service,
         )
         .await
         .unwrap();

@@ -1,15 +1,16 @@
 use axum::{body::BoxBody, extract::Path, http::StatusCode, response::Response};
 
 use crate::{
-    constants, extract_package_and_version, resolve_package, resolving::ResolveError, Package,
-    Repository, username::Username, package_name::PackageName,
+    constants, extract_package_and_version, package_name::PackageName, resolve_package,
+    resolving::ResolveError, username::Username, Package, Repository,
 };
 
 pub async fn resolve(
     Path((user, package_and_version)): Path<(String, String)>,
     package_repo: impl Repository<Package>,
 ) -> Result<Response, StatusCode> {
-    let (username, package_name, version_name) = build_username_package_and_version(user, &package_and_version)?;
+    let (username, package_name, version_name) =
+        build_username_package_and_version(user, &package_and_version)?;
 
     let uri = resolve_package(&username, &package_name, version_name, &package_repo)
         .await
@@ -31,14 +32,15 @@ pub async fn resolve(
     Ok(response)
 }
 
-fn build_username_package_and_version(user: String, package_and_version: &str) -> Result<(Username, PackageName, Option<&str>), StatusCode> {
-    let username = user.parse()
-        .map_err(|_| StatusCode::BAD_REQUEST)?;
+fn build_username_package_and_version(
+    user: String,
+    package_and_version: &str,
+) -> Result<(Username, PackageName, Option<&str>), StatusCode> {
+    let username = user.parse().map_err(|_| StatusCode::BAD_REQUEST)?;
 
     let (package_name, version_name) = extract_package_and_version(&package_and_version);
 
-    let package_name = package_name.parse()
-        .map_err(|_| StatusCode::BAD_REQUEST)?;
+    let package_name = package_name.parse().map_err(|_| StatusCode::BAD_REQUEST)?;
 
     Ok((username, package_name, version_name))
 }
@@ -49,7 +51,10 @@ mod tests {
     use axum::{extract::Path, http::StatusCode, Json};
     use mockall::{mock, predicate::eq};
 
-    use crate::{functions::resolve, Package, Repository, RepositoryError, UriResponse, Version, package_name::PackageName, username::Username};
+    use crate::{
+        functions::resolve, package_name::PackageName, username::Username, Package, Repository,
+        RepositoryError, UriResponse, Version,
+    };
 
     mock! {
       PackageRepository {}
@@ -80,7 +85,7 @@ mod tests {
                 Version {
                     name: "1.0.2".into(),
                     uri: "uri2".into(),
-                }
+                },
             ],
         };
 
@@ -89,11 +94,7 @@ mod tests {
             .with(eq("user1/package1".to_string()))
             .return_once(move |_| Ok(package.clone()));
 
-        let result = resolve(
-            Path(("user1".into(), "package1".into())),
-            package_repo,
-        )
-        .await;
+        let result = resolve(Path(("user1".into(), "package1".into())), package_repo).await;
 
         let expected_response = UriResponse {
             uri: "uri2".to_string(),
@@ -124,7 +125,7 @@ mod tests {
                 Version {
                     name: "1.0.2".into(),
                     uri: "uri2".into(),
-                }
+                },
             ],
         };
 
@@ -194,9 +195,7 @@ mod tests {
     async fn invalid_package_name_returns_bad_request1() {
         let mut package_repo = MockPackageRepository::new();
 
-        package_repo
-            .expect_read()
-            .times(0);
+        package_repo.expect_read().times(0);
 
         let result = resolve(
             Path(("user1".into(), "pack!age1@1.0.0".into())),
@@ -211,9 +210,7 @@ mod tests {
     async fn invalid_package_name_returns_bad_request2() {
         let mut package_repo = MockPackageRepository::new();
 
-        package_repo
-            .expect_read()
-            .times(0);
+        package_repo.expect_read().times(0);
 
         let result = resolve(
             Path(("user1".into(), "pack age1@1.0.0".into())),

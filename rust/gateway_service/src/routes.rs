@@ -1,10 +1,17 @@
 use aws_sdk_dynamodb::Client;
 
-use axum::{extract::Path, http::{StatusCode, HeaderMap}, response::Response, routing::get, Json, Router};
+use axum::{
+    extract::Path,
+    http::{HeaderMap, StatusCode},
+    response::Response,
+    routing::get,
+    Json, Router,
+};
 use lambda_http::{run, Error as HttpError};
 
 use crate::{
-    constants, dynamodb::PackageRepository, functions, setup_logging, Package, Repository, AccountService, RemoteAccountService,
+    constants, dynamodb::PackageRepository, functions, setup_logging, AccountService, Package,
+    RemoteAccountService, Repository,
 };
 
 pub async fn setup_routes() -> Result<(), HttpError> {

@@ -24,9 +24,21 @@ mod tests {
         );
         assert_eq!(extract_package_and_version("name"), ("name", None));
         assert_eq!(extract_package_and_version("name@"), ("name", None));
-        assert_eq!(extract_package_and_version("name@1.0.0"), ("name", Some("1.0.0")));
-        assert_eq!(extract_package_and_version("name@1.0.0-pre.1"), ("name", Some("1.0.0-pre.1")));
-        assert_eq!(extract_package_and_version("name-of-package@1.0.0-pre.1"), ("name-of-package", Some("1.0.0-pre.1")));
-        assert_eq!(extract_package_and_version("name_of_package@1.0.0-pre.1"), ("name_of_package", Some("1.0.0-pre.1")));
+        assert_eq!(
+            extract_package_and_version("name@1.0.0"),
+            ("name", Some("1.0.0"))
+        );
+        assert_eq!(
+            extract_package_and_version("name@1.0.0-pre.1"),
+            ("name", Some("1.0.0-pre.1"))
+        );
+        assert_eq!(
+            extract_package_and_version("name-of-package@1.0.0-pre.1"),
+            ("name-of-package", Some("1.0.0-pre.1"))
+        );
+        assert_eq!(
+            extract_package_and_version("name_of_package@1.0.0-pre.1"),
+            ("name_of_package", Some("1.0.0-pre.1"))
+        );
     }
 }

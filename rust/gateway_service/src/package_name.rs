@@ -1,7 +1,10 @@
-use std::{fmt::{Display, Formatter, self}, str::FromStr};
+use std::{
+    fmt::{self, Display, Formatter},
+    str::FromStr,
+};
 
 use regex::Regex;
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct PackageName(String);
@@ -24,11 +27,11 @@ impl FromStr for PackageName {
         }
 
         let re = Regex::new(r"^[a-zA-Z0-9_-]*$").unwrap();
-       
+
         if !re.is_match(&name) {
             return Err(&PackageNameParseError {});
         }
-        
+
         Ok(Self(name.to_string()))
     }
 }
@@ -50,4 +53,3 @@ mod tests {
         assert_eq!("test@a".parse::<PackageName>().is_ok(), false);
     }
 }
-

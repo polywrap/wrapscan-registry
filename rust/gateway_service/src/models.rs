@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{IVersion, username::Username, package_name::PackageName};
+use crate::{package_name::PackageName, username::Username, IVersion};
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Package {

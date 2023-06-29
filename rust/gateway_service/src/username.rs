@@ -1,4 +1,7 @@
-use std::{fmt::{Display, Formatter, self}, str::FromStr};
+use std::{
+    fmt::{self, Display, Formatter},
+    str::FromStr,
+};
 
 use regex::Regex;
 use serde_derive::{Deserialize, Serialize};
@@ -24,11 +27,11 @@ impl FromStr for Username {
         }
 
         let re = Regex::new(r"^[a-zA-Z0-9_]*$").unwrap();
-       
+
         if !re.is_match(&name) {
             return Err(&UsernameParseError {});
         }
-        
+
         Ok(Self(name.to_string()))
     }
 }

@@ -76,8 +76,10 @@ mod tests {
     use mockall::{mock, predicate::eq};
 
     use crate::{
+        package_name::PackageName,
         publishing::{publish_package, PublishError},
-        Package, Repository, RepositoryError, Version, username::Username, package_name::PackageName,
+        username::Username,
+        Package, Repository, RepositoryError, Version,
     };
 
     mock! {
@@ -155,7 +157,7 @@ mod tests {
                 .with(eq("user1/package1".to_string()))
                 .return_once(move |_| Ok(package.clone()));
         }
-        
+
         package_repo.expect_update().never();
 
         let result = publish_package(

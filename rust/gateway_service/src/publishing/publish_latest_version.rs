@@ -40,8 +40,10 @@ mod tests {
     use mockall::{mock, predicate::eq};
 
     use crate::{
+        package_name::PackageName,
         publishing::{publish_latest_version, PublishError},
-        Package, Repository, RepositoryError, Version, package_name::PackageName, username::Username,
+        username::Username,
+        Package, Repository, RepositoryError, Version,
     };
 
     mock! {
