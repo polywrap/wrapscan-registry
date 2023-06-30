@@ -95,6 +95,11 @@ async fn get_dynamodb_client() -> Client {
     Client::new(&config)
 }
 
+#[cfg(feature = "local")]
+async fn get_dynamodb_client() -> Client {
+    crate::local_db::get_dynamodb_client().await
+}
+
 #[cfg(not(feature = "local"))]
 async fn get_wrap_account_service() -> impl AccountService {
     use crate::account_service::SingleAccountService;

@@ -118,7 +118,7 @@ mod tests {
         package_repo
             .expect_update()
             .withf(move |p| {
-                &p.id == &package.id && p.versions.len() == 2 && p.versions[1] == new_version
+                p.id == package.id && p.versions.len() == 2 && p.versions[1] == new_version
             })
             .return_once(move |_| Ok(()));
 
