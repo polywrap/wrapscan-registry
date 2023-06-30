@@ -5,7 +5,7 @@ use aws_sdk_dynamodb::operation::get_item::{GetItemError, GetItemOutput};
 use aws_sdk_dynamodb::types::AttributeValue;
 use aws_sdk_dynamodb::Client;
 
-use crate::{constants, Package, Repository, RepositoryError, debug};
+use crate::{constants, debug, Package, Repository, RepositoryError};
 
 pub struct PackageRepository {
     client: Client,
@@ -54,7 +54,10 @@ impl Repository<Package> for PackageRepository {
         self.client
             .put_item()
             .table_name(&self.table_name)
-            .item(constants::PACKAGES_TABLE_KEY_NAME, AttributeValue::S(entity.id.clone()))
+            .item(
+                constants::PACKAGES_TABLE_KEY_NAME,
+                AttributeValue::S(entity.id.clone()),
+            )
             .item("object", AttributeValue::S(item))
             .send()
             .await

@@ -10,14 +10,17 @@ use axum::{
 use lambda_http::{run, Error as HttpError};
 
 use crate::{
-    constants, dynamodb::PackageRepository, functions, Package, Repository, setup_logging, account_service::{RemoteAccountService, AccountService},
+    account_service::{AccountService, RemoteAccountService},
+    constants,
+    dynamodb::PackageRepository,
+    functions, setup_logging, Package, Repository,
 };
 
 pub async fn setup_routes() -> Result<(), HttpError> {
     setup_logging();
 
     #[cfg(feature = "local")]
-    {     
+    {
         use crate::local_db;
         dotenvy::dotenv()?;
 
@@ -29,12 +32,11 @@ pub async fn setup_routes() -> Result<(), HttpError> {
     let app = Router::new()
         .route(
             "/dev/u/:user/:packageAndVersion/*filePath",
-            get(resolve_package)
-            .with_state(dynamodb_client.clone()),
-        ).route(
+            get(resolve_package).with_state(dynamodb_client.clone()),
+        )
+        .route(
             "/dev/u/:user/:packageAndVersion",
-            post(publish_package)
-            .with_state(dynamodb_client.clone()),
+            post(publish_package).with_state(dynamodb_client.clone()),
         );
 
     #[cfg(not(feature = "local"))]
@@ -43,7 +45,7 @@ pub async fn setup_routes() -> Result<(), HttpError> {
     }
 
     #[cfg(feature = "local")]
-    { 
+    {
         let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 3000));
         axum::Server::bind(&addr)
             .serve(app.into_make_service())
@@ -54,7 +56,10 @@ pub async fn setup_routes() -> Result<(), HttpError> {
     }
 }
 
-async fn resolve_package(path: Path<(String, String, String)>, State(client): State<Client>) -> Result<Response, StatusCode> {
+async fn resolve_package(
+    path: Path<(String, String, String)>,
+    State(client): State<Client>,
+) -> Result<Response, StatusCode> {
     let package_repo = get_package_repository(client).await;
 
     functions::resolve(path, package_repo).await

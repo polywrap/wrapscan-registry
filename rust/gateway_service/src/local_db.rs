@@ -1,7 +1,14 @@
 use std::fs;
 
 use aws_config::{meta::region::RegionProviderChain, SdkConfig};
-use aws_sdk_dynamodb::{Client, config::Region, meta::PKG_VERSION, types::{AttributeDefinition, ScalarAttributeType, KeySchemaElement, ProvisionedThroughput, KeyType}};
+use aws_sdk_dynamodb::{
+    config::Region,
+    meta::PKG_VERSION,
+    types::{
+        AttributeDefinition, KeySchemaElement, KeyType, ProvisionedThroughput, ScalarAttributeType,
+    },
+    Client,
+};
 
 use axum::{
     extract::Path,
@@ -10,12 +17,12 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use lambda_http::{run, Error as HttpError};
 use clap::Parser;
+use lambda_http::{run, Error as HttpError};
 
 use crate::{
-    constants, dynamodb::PackageRepository, functions, AccountService, Package,
-    RemoteAccountService, Repository, SingleAccountService, setup_logging,
+    constants, dynamodb::PackageRepository, functions, setup_logging, AccountService, Package,
+    RemoteAccountService, Repository, SingleAccountService,
 };
 
 pub async fn get_dynamodb_client() -> Client {

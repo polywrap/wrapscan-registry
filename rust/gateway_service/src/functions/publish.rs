@@ -7,10 +7,11 @@ use axum::{
 };
 
 use crate::{
-    get_username_package_and_version,
+    account_service::KeyValidationError,
+    debug, debug_println, get_username_package_and_version,
     publishing::{publish_package, PublishError},
     routes::UriBody,
-    AccountService, Package, Repository, debug_println, debug, account_service::KeyValidationError,
+    AccountService, Package, Repository,
 };
 
 pub async fn publish(
@@ -20,7 +21,7 @@ pub async fn publish(
     package_repo: impl Repository<Package>,
     account_service: impl AccountService,
 ) -> Result<Response, StatusCode> {
-    debug!(&user,  &package_and_version, &headers);
+    debug!(&user, &package_and_version, &headers);
 
     let (username, package_name, version_name) =
         get_username_package_and_version(user, &package_and_version)?;

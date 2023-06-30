@@ -7,9 +7,8 @@ macro_rules! debug {
 #[cfg(not(feature = "local"))]
 #[macro_export]
 macro_rules! debug {
-    ($($x:tt)*) => ({})
+    ($($x:tt)*) => {{}};
 }
-
 
 #[cfg(feature = "local")]
 #[macro_export]
@@ -20,5 +19,5 @@ macro_rules! debug_println {
 #[cfg(not(feature = "local"))]
 #[macro_export]
 macro_rules! debug_println {
-    ($($x:tt)*) => ({})
+    ($($x:tt)*) => {{}};
 }

@@ -2,10 +2,9 @@ use async_trait::async_trait;
 
 use crate::username::Username;
 
-use super::{AccountService, account_service::KeyValidationError};
+use super::{account_service::KeyValidationError, AccountService};
 
-pub struct AllowAllAccountService {
-}
+pub struct AllowAllAccountService {}
 
 #[async_trait]
 impl AccountService for AllowAllAccountService {

@@ -1,8 +1,8 @@
 use axum::{body::BoxBody, extract::Path, http::StatusCode, response::Response};
 
 use crate::{
-    constants, get_username_package_and_version, resolve_package, resolving::ResolveError, Package,
-    Repository, debug, debug_println,
+    constants, debug, debug_println, get_username_package_and_version, resolve_package,
+    resolving::ResolveError, Package, Repository,
 };
 
 pub async fn resolve(
@@ -83,7 +83,11 @@ mod tests {
             .with(eq("user1/package1".to_string()))
             .return_once(move |_| Ok(package));
 
-        let result = resolve(Path(("user1".into(), "package1".into(), "some/path".into())), package_repo).await;
+        let result = resolve(
+            Path(("user1".into(), "package1".into(), "some/path".into())),
+            package_repo,
+        )
+        .await;
 
         let expected_response = UriResponse {
             uri: "uri2".to_string(),
@@ -147,7 +151,11 @@ mod tests {
             .with(eq("user1/package1".to_string()))
             .return_once(move |_| Err(RepositoryError::NotFound));
 
-        let result = resolve(Path(("user1".into(), "package1".into(), "some/path".into())), package_repo).await;
+        let result = resolve(
+            Path(("user1".into(), "package1".into(), "some/path".into())),
+            package_repo,
+        )
+        .await;
 
         assert!(matches!(result, Err(StatusCode::NOT_FOUND)));
     }
