@@ -1,33 +1,40 @@
-use std::fs;
-
-use aws_config::{meta::region::RegionProviderChain, SdkConfig};
-use aws_sdk_dynamodb::{Client, config::Region, meta::PKG_VERSION, types::{AttributeDefinition, ScalarAttributeType, KeySchemaElement, ProvisionedThroughput, KeyType}};
+use aws_sdk_dynamodb::Client;
 
 use axum::{
-    extract::Path,
+    extract::{Path, State},
     http::{HeaderMap, StatusCode},
     response::Response,
     routing::{get, post},
     Json, Router,
 };
 use lambda_http::{run, Error as HttpError};
-use clap::Parser;
 
 use crate::{
-    constants, dynamodb::PackageRepository, functions, AccountService, Package,
-    RemoteAccountService, Repository, SingleAccountService, setup_logging,
+    constants, dynamodb::PackageRepository, functions, Package, Repository, setup_logging, account_service::{RemoteAccountService, AccountService},
 };
 
 pub async fn setup_routes() -> Result<(), HttpError> {
     setup_logging();
 
+    #[cfg(feature = "local")]
+    {     
+        use crate::local_db;
+        dotenvy::dotenv()?;
+
+        crate::local_db::setup_local_db().await;
+    }
+
+    let dynamodb_client = get_dynamodb_client().await;
+
     let app = Router::new()
         .route(
             "/dev/u/:user/:packageAndVersion/*filePath",
-            get(resolve_package),
+            get(resolve_package)
+            .with_state(dynamodb_client.clone()),
         ).route(
             "/dev/u/:user/:packageAndVersion",
-            post(publish_package),
+            post(publish_package)
+            .with_state(dynamodb_client.clone()),
         );
 
     #[cfg(not(feature = "local"))]
@@ -36,11 +43,7 @@ pub async fn setup_routes() -> Result<(), HttpError> {
     }
 
     #[cfg(feature = "local")]
-    {      
-        dotenvy::dotenv()?;
-
-        crate::setup_local_db().await;
-
+    { 
         let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 3000));
         axum::Server::bind(&addr)
             .serve(app.into_make_service())
@@ -51,8 +54,7 @@ pub async fn setup_routes() -> Result<(), HttpError> {
     }
 }
 
-async fn resolve_package(path: Path<(String, String, String)>) -> Result<Response, StatusCode> {
-    let client = get_dynamodb_client().await;
+async fn resolve_package(path: Path<(String, String, String)>, State(client): State<Client>) -> Result<Response, StatusCode> {
     let package_repo = get_package_repository(client).await;
 
     functions::resolve(path, package_repo).await
@@ -64,11 +66,11 @@ pub struct UriBody {
 }
 
 async fn publish_package(
+    State(client): State<Client>,
     path: Path<(String, String)>,
     headers: HeaderMap,
     body: Json<UriBody>,
 ) -> Result<Response, StatusCode> {
-    let client = get_dynamodb_client().await;
     let package_repo = get_package_repository(client).await;
     let account_service = get_wrap_account_service().await;
 
@@ -88,23 +90,10 @@ async fn get_dynamodb_client() -> Client {
     Client::new(&config)
 }
 
-#[cfg(feature = "local")]
-async fn get_dynamodb_client() -> Client {
-    use crate::setup_local_db;
-
-    let config = setup_local_db::make_config(setup_local_db::Opt::parse()).await.unwrap();
-    let dynamodb_local_config = aws_sdk_dynamodb::config::Builder::from(&config)
-        .endpoint_url(
-            // 8000 is the default dynamodb port
-            "http://localhost:8000",
-        )
-        .build();
-
-    Client::from_conf(dynamodb_local_config)
-}
-
 #[cfg(not(feature = "local"))]
 async fn get_wrap_account_service() -> impl AccountService {
+    use crate::account_service::SingleAccountService;
+
     SingleAccountService::new(
         "wrap".parse().unwrap(),
         std::env::var(constants::ENV_WRAP_USER_KEY).expect("ENV_WRAP_USER_KEY not set"),

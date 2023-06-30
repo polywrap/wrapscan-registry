@@ -1,6 +1,8 @@
 use async_trait::async_trait;
 
-use crate::{username::Username, AccountService, KeyValidationError};
+use crate::{username::Username};
+
+use super::{AccountService, account_service::KeyValidationError};
 
 pub struct RemoteAccountService {
     url: String,

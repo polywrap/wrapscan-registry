@@ -10,7 +10,7 @@ use crate::{
     get_username_package_and_version,
     publishing::{publish_package, PublishError},
     routes::UriBody,
-    AccountService, KeyValidationError, Package, Repository, debug_println, debug,
+    AccountService, Package, Repository, debug_println, debug, account_service::KeyValidationError,
 };
 
 pub async fn publish(

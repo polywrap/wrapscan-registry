@@ -18,7 +18,18 @@ use crate::{
     RemoteAccountService, Repository, SingleAccountService, setup_logging,
 };
 
-#[cfg(feature = "local")]
+pub async fn get_dynamodb_client() -> Client {
+    let config = make_config(Opt::parse()).await.unwrap();
+    let config = aws_sdk_dynamodb::config::Builder::from(&config)
+        .endpoint_url(
+            // 8000 is the default dynamodb port
+            "http://localhost:8000",
+        )
+        .build();
+
+    Client::from_conf(config)
+}
+
 pub async fn setup_local_db() {
     println!("Setting up local DynamoDB...");
 
