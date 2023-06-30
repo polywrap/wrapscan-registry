@@ -5,7 +5,7 @@ use aws_sdk_dynamodb::operation::get_item::{GetItemError, GetItemOutput};
 use aws_sdk_dynamodb::types::AttributeValue;
 use aws_sdk_dynamodb::Client;
 
-use crate::{constants, Package, Repository, RepositoryError};
+use crate::{constants, Package, Repository, RepositoryError, debug};
 
 pub struct PackageRepository {
     client: Client,
@@ -32,10 +32,11 @@ impl Repository<Package> for PackageRepository {
             .send()
             .await
             .map_err(|error| RepositoryError::Unknown(error.to_string()))?;
+        debug!(&response);
 
         let item = response.item.ok_or(RepositoryError::NotFound)?;
         let package_json = item
-            .get(constants::PACKAGES_TABLE_KEY_NAME)
+            .get("object")
             .and_then(|v| v.as_s().ok())
             .ok_or(RepositoryError::NotFound)?;
 
@@ -48,11 +49,13 @@ impl Repository<Package> for PackageRepository {
     async fn update(&self, entity: &Package) -> Result<(), RepositoryError> {
         let item = serde_json::to_string(entity)
             .map_err(|_| RepositoryError::Unknown("Failed to serialize package".to_string()))?;
+        debug!(&item);
 
         self.client
             .put_item()
             .table_name(&self.table_name)
-            .item(constants::PACKAGES_TABLE_KEY_NAME, AttributeValue::S(item))
+            .item(constants::PACKAGES_TABLE_KEY_NAME, AttributeValue::S(entity.id.clone()))
+            .item("object", AttributeValue::S(item))
             .send()
             .await
             .map_err(|error| RepositoryError::Unknown(error.to_string()))?;

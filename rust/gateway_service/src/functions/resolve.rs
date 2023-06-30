@@ -2,24 +2,29 @@ use axum::{body::BoxBody, extract::Path, http::StatusCode, response::Response};
 
 use crate::{
     constants, get_username_package_and_version, resolve_package, resolving::ResolveError, Package,
-    Repository,
+    Repository, debug, debug_println,
 };
 
 pub async fn resolve(
-    Path((user, package_and_version)): Path<(String, String)>,
+    Path((user, package_and_version, _file_path)): Path<(String, String, String)>,
     package_repo: impl Repository<Package>,
 ) -> Result<Response, StatusCode> {
+    debug!(&user, &package_and_version, &_file_path);
+
     let (username, package_name, version_name) =
         get_username_package_and_version(user, &package_and_version)?;
 
     let uri = resolve_package(&username, &package_name, version_name, &package_repo)
         .await
-        .map_err(|e| match e {
-            ResolveError::PackageNotFound => StatusCode::NOT_FOUND,
-            ResolveError::VersionNotFound => StatusCode::NOT_FOUND,
-            ResolveError::RepositoryError(e) => {
-                eprintln!("INTERNAL_SERVER_ERROR resolving package: {:?}", e);
-                StatusCode::INTERNAL_SERVER_ERROR
+        .map_err(|e| {
+            debug_println!("Error resolving package: {}", &e);
+            match e {
+                ResolveError::PackageNotFound => StatusCode::NOT_FOUND,
+                ResolveError::VersionNotFound => StatusCode::NOT_FOUND,
+                ResolveError::RepositoryError(e) => {
+                    eprintln!("INTERNAL_SERVER_ERROR resolving package: {:?}", e);
+                    StatusCode::INTERNAL_SERVER_ERROR
+                }
             }
         })?;
 
@@ -78,7 +83,7 @@ mod tests {
             .with(eq("user1/package1".to_string()))
             .return_once(move |_| Ok(package));
 
-        let result = resolve(Path(("user1".into(), "package1".into())), package_repo).await;
+        let result = resolve(Path(("user1".into(), "package1".into(), "some/path".into())), package_repo).await;
 
         let expected_response = UriResponse {
             uri: "uri2".to_string(),
@@ -119,7 +124,7 @@ mod tests {
             .return_once(move |_| Ok(package));
 
         let result = resolve(
-            Path(("user1".into(), "package1@1.0.1".into())),
+            Path(("user1".into(), "package1@1.0.1".into(), "some/path".into())),
             package_repo,
         )
         .await;
@@ -142,7 +147,7 @@ mod tests {
             .with(eq("user1/package1".to_string()))
             .return_once(move |_| Err(RepositoryError::NotFound));
 
-        let result = resolve(Path(("user1".into(), "package1".into())), package_repo).await;
+        let result = resolve(Path(("user1".into(), "package1".into(), "some/path".into())), package_repo).await;
 
         assert!(matches!(result, Err(StatusCode::NOT_FOUND)));
     }
@@ -167,7 +172,7 @@ mod tests {
             .return_once(move |_| Ok(package));
 
         let result = resolve(
-            Path(("user1".into(), "package1@2.0.0".into())),
+            Path(("user1".into(), "package1@2.0.0".into(), "some/path".into())),
             package_repo,
         )
         .await;
@@ -182,7 +187,7 @@ mod tests {
         package_repo.expect_read().times(0);
 
         let result = resolve(
-            Path(("user1".into(), "pack!age1@1.0.0".into())),
+            Path(("user1".into(), "pack!age1@1.0.0".into(), "some/path".into())),
             package_repo,
         )
         .await;
@@ -197,7 +202,7 @@ mod tests {
         package_repo.expect_read().times(0);
 
         let result = resolve(
-            Path(("user1".into(), "pack age1@1.0.0".into())),
+            Path(("user1".into(), "pack age1@1.0.0".into(), "some/path".into())),
             package_repo,
         )
         .await;

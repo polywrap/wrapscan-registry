@@ -32,13 +32,23 @@ mod package_name;
 mod constants;
 
 mod account_service;
-pub use account_service::*;
+use account_service::*;
 
 mod remote_account_service;
-pub use remote_account_service::RemoteAccountService;
+use remote_account_service::RemoteAccountService;
 
 mod get_username_package_and_version;
-pub use get_username_package_and_version::get_username_package_and_version;
+use get_username_package_and_version::get_username_package_and_version;
 
 mod single_account_service;
-pub use single_account_service::SingleAccountService;
+use single_account_service::SingleAccountService;
+
+mod allow_all_account_service;
+use allow_all_account_service::AllowAllAccountService;
+
+#[cfg(feature = "local")]
+mod setup_local_db;
+#[cfg(feature = "local")]
+use setup_local_db::setup_local_db;
+
+mod debug;

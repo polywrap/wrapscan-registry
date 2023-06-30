@@ -10,7 +10,7 @@ use crate::{
     get_username_package_and_version,
     publishing::{publish_package, PublishError},
     routes::UriBody,
-    AccountService, KeyValidationError, Package, Repository,
+    AccountService, KeyValidationError, Package, Repository, debug_println, debug,
 };
 
 pub async fn publish(
@@ -20,6 +20,8 @@ pub async fn publish(
     package_repo: impl Repository<Package>,
     account_service: impl AccountService,
 ) -> Result<Response, StatusCode> {
+    debug!(&user,  &package_and_version, &headers);
+
     let (username, package_name, version_name) =
         get_username_package_and_version(user, &package_and_version)?;
 
@@ -28,23 +30,31 @@ pub async fn publish(
     account_service
         .verify_user_key(&username, &api_key)
         .await
-        .map_err(|e| match e {
-            KeyValidationError::Invalid => StatusCode::UNAUTHORIZED,
-            KeyValidationError::Unknown(e) => {
-                eprintln!("INTERNAL_SERVER_ERROR verifying user key: {:?}", e);
-                StatusCode::INTERNAL_SERVER_ERROR
+        .map_err(|e| {
+            debug_println!("Error publishing package: {}", &e);
+
+            match e {
+                KeyValidationError::Invalid => StatusCode::UNAUTHORIZED,
+                KeyValidationError::Unknown(e) => {
+                    eprintln!("INTERNAL_SERVER_ERROR verifying user key: {:?}", e);
+                    StatusCode::INTERNAL_SERVER_ERROR
+                }
             }
         })?;
 
     publish_package(&username, &package_name, version_name, uri, package_repo)
         .await
-        .map_err(|e| match e {
-            PublishError::InvalidVersionFormat => StatusCode::BAD_REQUEST,
-            PublishError::DuplicateVersion => StatusCode::BAD_REQUEST,
-            PublishError::LatestVersionNotAllowed => StatusCode::BAD_REQUEST,
-            PublishError::RepositoryError(e) => {
-                eprintln!("INTERNAL_SERVER_ERROR publishing package: {:?}", e);
-                StatusCode::INTERNAL_SERVER_ERROR
+        .map_err(|e| {
+            debug_println!("Error publishing package: {}", &e);
+
+            match e {
+                PublishError::InvalidVersionFormat => StatusCode::BAD_REQUEST,
+                PublishError::DuplicateVersion => StatusCode::BAD_REQUEST,
+                PublishError::LatestVersionNotAllowed => StatusCode::BAD_REQUEST,
+                PublishError::RepositoryError(e) => {
+                    eprintln!("INTERNAL_SERVER_ERROR publishing package: {:?}", e);
+                    StatusCode::INTERNAL_SERVER_ERROR
+                }
             }
         })?;
 
