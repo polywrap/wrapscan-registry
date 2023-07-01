@@ -4,9 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "cargo build",
+    "build": "cargo build -F local && cargo build",
     "deploy": "npx serverless deploy",
-    "test": "cargo test",
+    "test": "cargo test -F local && cargo test",
     "package": "npx serverless package",
     "db": "cargo run -F local",
     "dev": "cargo run -F local"
