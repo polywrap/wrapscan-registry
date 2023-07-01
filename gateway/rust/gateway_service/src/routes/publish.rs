@@ -7,10 +7,9 @@ use axum::{
 };
 use http::{HeaderMap, StatusCode};
 
-use crate::accounts::AccountService;
+use crate::{accounts::AccountService, models::Package};
 use crate::{
-    accounts::RemoteAccountService, constants, dynamodb::PackageRepository, functions, Package,
-    Repository,
+    accounts::RemoteAccountService, constants, dynamodb::PackageRepository, functions, Repository,
 };
 
 pub async fn publish(

@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use crate::username::Username;
+use crate::Username;
 
 use super::{account_service::KeyValidationError, AccountService};
 

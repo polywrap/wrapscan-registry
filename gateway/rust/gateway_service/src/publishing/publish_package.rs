@@ -1,6 +1,5 @@
-use crate::package_name::PackageName;
-use crate::username::Username;
-use crate::{semver, Package, PartialVersion, Repository, RepositoryError, Version, WrapUri};
+use crate::models::{Package, PackageName, PartialVersion, Username, Version, WrapUri};
+use crate::{semver, Repository, RepositoryError};
 
 use super::error::PublishError;
 

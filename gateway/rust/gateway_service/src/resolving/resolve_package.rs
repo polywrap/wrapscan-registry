@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
 use crate::{
-    package_name::PackageName, semver, username::Username, Package, Repository, RepositoryError,
-    WrapUri,
+    models::{Package, PackageName, Username, WrapUri},
+    semver, Repository, RepositoryError,
 };
 
 pub async fn resolve_package(
@@ -55,8 +55,9 @@ mod tests {
     use resolve_package::ResolveError;
 
     use crate::{
-        package_name::PackageName, resolving::resolve_package, username::Username, Package,
-        Repository, RepositoryError, Version,
+        models::{Package, PackageName, Username, Version},
+        resolving::resolve_package,
+        Repository, RepositoryError,
     };
 
     mock! {

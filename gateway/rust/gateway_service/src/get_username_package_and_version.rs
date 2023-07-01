@@ -1,6 +1,9 @@
 use reqwest::StatusCode;
 
-use crate::{extract_package_and_version, package_name::PackageName, username::Username};
+use crate::{
+    extract_package_and_version,
+    models::{PackageName, Username},
+};
 
 pub fn get_username_package_and_version(
     username: String,

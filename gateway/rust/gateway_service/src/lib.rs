@@ -6,12 +6,6 @@ mod dynamodb;
 mod repository;
 pub use repository::*;
 
-mod wrap_uri;
-pub use wrap_uri::WrapUri;
-
-mod models;
-pub use models::*;
-
 mod functions;
 
 mod setup_logging;
@@ -28,10 +22,6 @@ use resolving::*;
 mod extract_package_and_version;
 use extract_package_and_version::extract_package_and_version;
 
-mod username;
-
-mod package_name;
-
 mod constants;
 
 mod accounts;
@@ -46,3 +36,5 @@ mod routes;
 
 #[cfg(feature = "local")]
 mod local_db;
+mod models;
+use models::*;

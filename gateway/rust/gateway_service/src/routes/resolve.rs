@@ -6,7 +6,7 @@ use axum::{
 };
 use http::StatusCode;
 
-use crate::{constants, dynamodb::PackageRepository, functions, Package, Repository};
+use crate::{constants, dynamodb::PackageRepository, functions, models::Package, Repository};
 
 pub async fn resolve(
     Path((user, package_and_version, file_path)): Path<(String, String, String)>,

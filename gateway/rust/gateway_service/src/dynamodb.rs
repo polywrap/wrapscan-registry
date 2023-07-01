@@ -5,7 +5,8 @@ use aws_sdk_dynamodb::operation::get_item::{GetItemError, GetItemOutput};
 use aws_sdk_dynamodb::types::AttributeValue;
 use aws_sdk_dynamodb::Client;
 
-use crate::{constants, debug, Package, Repository, RepositoryError};
+use crate::models::Package;
+use crate::{constants, debug, Repository, RepositoryError};
 
 pub struct PackageRepository {
     client: Client,

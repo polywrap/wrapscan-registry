@@ -1,8 +1,11 @@
 use axum::http::StatusCode;
 
 use crate::{
-    debug, debug_println, get_username_package_and_version, resolve_package,
-    resolving::ResolveError, Package, Repository, WrapUri,
+    debug, debug_println, get_username_package_and_version,
+    models::{Package, WrapUri},
+    resolve_package,
+    resolving::ResolveError,
+    Repository,
 };
 
 pub async fn resolve(

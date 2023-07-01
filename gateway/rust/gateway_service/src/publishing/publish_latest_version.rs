@@ -1,4 +1,7 @@
-use crate::{Package, Repository, Version, WrapUri};
+use crate::{
+    models::{Package, Version, WrapUri},
+    Repository,
+};
 
 use super::error::PublishError;
 

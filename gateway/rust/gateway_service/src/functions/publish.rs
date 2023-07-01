@@ -3,8 +3,9 @@ use axum::http::StatusCode;
 use crate::{
     accounts::KeyValidationError,
     debug, debug_println, get_username_package_and_version,
+    models::Package,
     publishing::{publish_package, PublishError},
-    AccountService, Package, Repository,
+    AccountService, Repository,
 };
 
 pub async fn publish(
@@ -62,8 +63,9 @@ mod tests {
     use mockall::{mock, predicate::eq};
 
     use crate::{
-        functions::publish, username::Username, AccountService, KeyValidationError, Package,
-        Repository, RepositoryError, Version,
+        functions::publish,
+        models::{Package, Username},
+        AccountService, KeyValidationError, Repository, RepositoryError, Version,
     };
 
     mock! {
