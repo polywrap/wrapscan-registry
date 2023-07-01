@@ -23,13 +23,13 @@ impl FromStr for PackageName {
 
     fn from_str(name: &str) -> Result<Self, Self::Err> {
         if name.len() < 3 || name.len() > 20 {
-            return Err(&ParseError {});
+            return Err(&ParseError);
         }
 
         let re = Regex::new(r"^[a-zA-Z0-9_-]*$").unwrap();
 
         if !re.is_match(name) {
-            return Err(&ParseError {});
+            return Err(&ParseError);
         }
 
         Ok(Self(name.to_string()))
