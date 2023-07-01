@@ -1,0 +1,46 @@
+name: Gateway CI
+
+on:
+  push: 
+    branches:
+      - main
+      - develop
+  pull_request:
+
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.69.0
+          override: true
+          
+      - name: Build local
+        run: cargo build -F local
+        working-directory: ./gateway
+
+      - name: Clippy local
+        run: cargo clippy -F local  
+        working-directory: ./gateway
+
+      - name: Test local
+        run: cargo test -F local  
+        working-directory: ./gateway
+
+      - name: Build release
+        run: cargo build
+        working-directory: ./gateway
+
+      - name: Clippy release
+        run: cargo clippy
+        working-directory: ./gateway
+
+      - name: Test release
+        run: cargo test
+        working-directory: ./gateway
+
