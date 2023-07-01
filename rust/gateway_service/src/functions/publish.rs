@@ -1,7 +1,7 @@
 use axum::{body::BoxBody, http::StatusCode, response::Response};
 
 use crate::{
-    account_service::KeyValidationError,
+    accounts::KeyValidationError,
     debug, debug_println, get_username_package_and_version,
     publishing::{publish_package, PublishError},
     AccountService, Package, Repository,

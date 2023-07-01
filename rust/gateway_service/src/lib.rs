@@ -31,8 +31,8 @@ mod package_name;
 
 mod constants;
 
-mod account_service;
-use account_service::*;
+mod accounts;
+use accounts::*;
 
 mod get_username_package_and_version;
 use get_username_package_and_version::get_username_package_and_version;

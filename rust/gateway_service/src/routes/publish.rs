@@ -6,10 +6,10 @@ use axum::{
 };
 use http::{HeaderMap, StatusCode};
 
-use crate::account_service::AccountService;
+use crate::accounts::AccountService;
 use crate::{
-    account_service::RemoteAccountService, constants, dynamodb::PackageRepository, functions,
-    Package, Repository,
+    accounts::RemoteAccountService, constants, dynamodb::PackageRepository, functions, Package,
+    Repository,
 };
 
 pub async fn publish(
@@ -64,7 +64,7 @@ async fn get_package_repository(dynamodb_client: Client) -> impl Repository<Pack
 
 #[cfg(not(feature = "local"))]
 async fn get_wrap_account_service() -> impl AccountService {
-    use crate::account_service::SingleAccountService;
+    use crate::accounts::SingleAccountService;
 
     SingleAccountService::new(
         "wrap".parse().unwrap(),
