@@ -29,6 +29,7 @@ tower = "0.4.13"
 tower-service = "0.3.2"
 dotenvy = "0.15.7"
 clap = { version = "4.3.10", features = ["derive"] }
+polywrap_core = "0.1.6-beta.7"
 
 [dev-dependencies]
 mockall = "0.11.4"

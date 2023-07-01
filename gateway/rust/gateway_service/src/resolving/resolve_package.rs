@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 use crate::{
     package_name::PackageName, semver, username::Username, Package, Repository, RepositoryError,
+    WrapUri,
 };
 
 pub async fn resolve_package(
@@ -9,7 +10,7 @@ pub async fn resolve_package(
     package_name: &PackageName,
     version_name: Option<&str>,
     package_repo: &impl Repository<Package>,
-) -> Result<String, ResolveError> {
+) -> Result<WrapUri, ResolveError> {
     let id = format!("{}/{}", user, package_name);
 
     let package = package_repo.read(&id).await.map_err(|error| match error {
@@ -82,11 +83,11 @@ mod tests {
             versions: vec![
                 Version {
                     name: "1.0.0".to_string(),
-                    uri: "uri1".to_string(),
+                    uri: "test/uri1".parse().unwrap(),
                 },
                 Version {
                     name: "2.0.0".to_string(),
-                    uri: "uri2".to_string(),
+                    uri: "test/uri2".parse().unwrap(),
                 },
             ],
         };
@@ -99,7 +100,7 @@ mod tests {
 
         let result = resolve_package(&user, &package_name, None, &mock_repo).await;
 
-        assert_eq!(result, Ok("uri2".to_string()));
+        assert_eq!(result, Ok("test/uri2".parse().unwrap()));
     }
 
     #[tokio::test]
@@ -117,11 +118,11 @@ mod tests {
             versions: vec![
                 Version {
                     name: "1.0.0".to_string(),
-                    uri: "uri1".to_string(),
+                    uri: "test/uri1".parse().unwrap(),
                 },
                 Version {
                     name: "2.0.0".to_string(),
-                    uri: "uri2".to_string(),
+                    uri: "test/uri2".parse().unwrap(),
                 },
             ],
         };
@@ -134,7 +135,7 @@ mod tests {
 
         let result = resolve_package(&user, &package_name, Some("2.0.0"), &mock_repo).await;
 
-        assert_eq!(result, Ok("uri2".to_string()));
+        assert_eq!(result, Ok("test/uri2".parse().unwrap()));
     }
 
     #[tokio::test]
@@ -152,11 +153,11 @@ mod tests {
             versions: vec![
                 Version {
                     name: "1.0.0".to_string(),
-                    uri: "uri1".to_string(),
+                    uri: "test/uri1".parse().unwrap(),
                 },
                 Version {
                     name: "2.0.0".to_string(),
-                    uri: "uri2".to_string(),
+                    uri: "test/uri2".parse().unwrap(),
                 },
             ],
         };

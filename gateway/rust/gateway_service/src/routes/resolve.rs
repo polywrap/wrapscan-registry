@@ -18,7 +18,7 @@ pub async fn resolve(
 
     let response: Response = Response::builder()
         .status(StatusCode::OK)
-        .header(constants::WRAP_URI_HEADER, uri)
+        .header(constants::WRAP_URI_HEADER, uri.to_string())
         .body(BoxBody::default())
         .unwrap();
 

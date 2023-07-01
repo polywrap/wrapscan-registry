@@ -1,6 +1,6 @@
 use crate::package_name::PackageName;
 use crate::username::Username;
-use crate::{semver, Package, PartialVersion, Repository, RepositoryError, Version};
+use crate::{semver, Package, PartialVersion, Repository, RepositoryError, Version, WrapUri};
 
 use super::error::PublishError;
 
@@ -10,7 +10,7 @@ pub async fn publish_package(
     user: &Username,
     package_name: &PackageName,
     version_name: Option<&str>,
-    uri: String,
+    uri: WrapUri,
     package_repo: impl Repository<Package>,
 ) -> Result<(), PublishError> {
     if let Some(version) = version_name {
@@ -97,13 +97,13 @@ mod tests {
             user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
-                uri: "uri1".into(),
+                uri: "test/uri1".parse().unwrap(),
             }],
         };
 
         let new_version = Version {
             name: "2.0.0".into(),
-            uri: "uri2".into(),
+            uri: "test/uri2".parse().unwrap(),
         };
 
         let mut package_repo = MockPackageRepository::new();
@@ -126,7 +126,7 @@ mod tests {
             &package.user,
             &package.name,
             Some("2.0.0"),
-            "uri2".into(),
+            "test/uri2".parse().unwrap(),
             package_repo,
         )
         .await;
@@ -142,7 +142,7 @@ mod tests {
             user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
-                uri: "uri1".into(),
+                uri: "test/uri1".parse().unwrap(),
             }],
         };
 
@@ -162,7 +162,7 @@ mod tests {
             &package.user,
             &package.name,
             Some("1.0.0"),
-            "uri2".into(),
+            "test/uri2".parse().unwrap(),
             package_repo,
         )
         .await;
@@ -178,7 +178,7 @@ mod tests {
             user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
-                uri: "uri1".into(),
+                uri: "test/uri1".parse().unwrap(),
             }],
         };
 
@@ -197,7 +197,7 @@ mod tests {
             &package.user,
             &package.name,
             Some("1.0.0a"),
-            "uri2".into(),
+            "test/uri2".parse().unwrap(),
             package_repo,
         )
         .await;

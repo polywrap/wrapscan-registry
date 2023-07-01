@@ -1,10 +1,10 @@
-use crate::{Package, Repository, Version};
+use crate::{Package, Repository, Version, WrapUri};
 
 use super::error::PublishError;
 
 pub async fn publish_latest_version(
     package: &mut Package,
-    uri: String,
+    uri: WrapUri,
     package_repo: impl Repository<Package>,
 ) -> Result<(), PublishError> {
     if package.versions.len() > 1 {
@@ -68,7 +68,7 @@ mod tests {
             user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "latest".into(),
-                uri: "uri_latest".into(),
+                uri: "test/uri_latest".parse().unwrap(),
             }],
         };
 
@@ -79,8 +79,12 @@ mod tests {
             .times(1)
             .returning(|_| Ok(()));
 
-        let result =
-            publish_latest_version(&mut package, "uri_latest".into(), mock_package_repo).await;
+        let result = publish_latest_version(
+            &mut package,
+            "test/uri_latest".parse().unwrap(),
+            mock_package_repo,
+        )
+        .await;
 
         assert!(
             result.is_ok(),
@@ -93,7 +97,8 @@ mod tests {
             "Version name is not 'latest'"
         );
         assert_eq!(
-            package.versions[0].uri, "uri_latest",
+            package.versions[0].uri,
+            "test/uri_latest".parse().unwrap(),
             "Unexpected URI for the latest version"
         );
     }
@@ -106,7 +111,7 @@ mod tests {
             user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "latest".into(),
-                uri: "uri1".into(),
+                uri: "test/uri1".parse().unwrap(),
             }],
         };
 
@@ -116,7 +121,7 @@ mod tests {
             user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "latest".into(),
-                uri: "uri_latest".into(),
+                uri: "test/uri_latest".parse().unwrap(),
             }],
         };
 
@@ -127,8 +132,12 @@ mod tests {
             .times(1)
             .returning(|_| Ok(()));
 
-        let result =
-            publish_latest_version(&mut package, "uri_latest".into(), mock_package_repo).await;
+        let result = publish_latest_version(
+            &mut package,
+            "test/uri_latest".parse().unwrap(),
+            mock_package_repo,
+        )
+        .await;
 
         assert!(
             result.is_ok(),
@@ -141,7 +150,8 @@ mod tests {
             "Version name is not 'latest'"
         );
         assert_eq!(
-            package.versions[0].uri, "uri_latest",
+            package.versions[0].uri,
+            "test/uri_latest".parse().unwrap(),
             "Unexpected URI for the latest version"
         );
     }
@@ -154,15 +164,19 @@ mod tests {
             user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
-                uri: "uri1".into(),
+                uri: "test/uri1".parse().unwrap(),
             }],
         };
 
         let mut mock_package_repo = MockPackageRepository::new();
         mock_package_repo.expect_update().times(0);
 
-        let result =
-            publish_latest_version(&mut package, "uri_latest".into(), mock_package_repo).await;
+        let result = publish_latest_version(
+            &mut package,
+            "test/uri_latest".parse().unwrap(),
+            mock_package_repo,
+        )
+        .await;
 
         assert_eq!(result, Err(PublishError::LatestVersionNotAllowed));
     }
@@ -176,11 +190,11 @@ mod tests {
             versions: vec![
                 Version {
                     name: "1.0.0".into(),
-                    uri: "uri1".into(),
+                    uri: "test/uri1".parse().unwrap(),
                 },
                 Version {
                     name: "1.0.1".into(),
-                    uri: "uri2".into(),
+                    uri: "test/uri2".parse().unwrap(),
                 },
             ],
         };
@@ -188,8 +202,12 @@ mod tests {
         let mut mock_package_repo = MockPackageRepository::new();
         mock_package_repo.expect_update().times(0);
 
-        let result =
-            publish_latest_version(&mut package, "uri_latest".into(), mock_package_repo).await;
+        let result = publish_latest_version(
+            &mut package,
+            "test/uri_latest".parse().unwrap(),
+            mock_package_repo,
+        )
+        .await;
 
         assert_eq!(result, Err(PublishError::LatestVersionNotAllowed));
     }
@@ -209,7 +227,7 @@ mod tests {
             user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "latest".into(),
-                uri: "uri_latest".into(),
+                uri: "test/uri_latest".parse().unwrap(),
             }],
         };
 
@@ -220,8 +238,12 @@ mod tests {
             .times(1)
             .returning(|_| Err(RepositoryError::Unknown("some error".to_string())));
 
-        let result =
-            publish_latest_version(&mut package, "uri_latest".into(), mock_package_repo).await;
+        let result = publish_latest_version(
+            &mut package,
+            "test/uri_latest".parse().unwrap(),
+            mock_package_repo,
+        )
+        .await;
 
         assert_eq!(
             result,

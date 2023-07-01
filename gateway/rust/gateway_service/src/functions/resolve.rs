@@ -2,7 +2,7 @@ use axum::http::StatusCode;
 
 use crate::{
     debug, debug_println, get_username_package_and_version, resolve_package,
-    resolving::ResolveError, Package, Repository,
+    resolving::ResolveError, Package, Repository, WrapUri,
 };
 
 pub async fn resolve(
@@ -10,7 +10,7 @@ pub async fn resolve(
     package_and_version: String,
     _file_path: String,
     package_repo: impl Repository<Package>,
-) -> Result<String, StatusCode> {
+) -> Result<WrapUri, StatusCode> {
     debug!(&user, &package_and_version, &_file_path);
 
     let (username, package_name, version_name) =
@@ -61,15 +61,15 @@ mod tests {
             versions: vec![
                 Version {
                     name: "1.0.0".into(),
-                    uri: "uri0".into(),
+                    uri: "test/uri0".parse().unwrap(),
                 },
                 Version {
                     name: "1.0.1".into(),
-                    uri: "uri1".into(),
+                    uri: "test/uri1".parse().unwrap(),
                 },
                 Version {
                     name: "1.0.2".into(),
-                    uri: "uri2".into(),
+                    uri: "test/uri2".parse().unwrap(),
                 },
             ],
         };
@@ -88,7 +88,7 @@ mod tests {
         .await
         .unwrap();
 
-        assert_eq!(result, "uri2".to_string());
+        assert_eq!(result, "test/uri2".parse().unwrap());
     }
 
     #[tokio::test]
@@ -102,15 +102,15 @@ mod tests {
             versions: vec![
                 Version {
                     name: "1.0.0".into(),
-                    uri: "uri0".into(),
+                    uri: "test/uri0".parse().unwrap(),
                 },
                 Version {
                     name: "1.0.1".into(),
-                    uri: "uri1".into(),
+                    uri: "test/uri1".parse().unwrap(),
                 },
                 Version {
                     name: "1.0.2".into(),
-                    uri: "uri2".into(),
+                    uri: "test/uri2".parse().unwrap(),
                 },
             ],
         };
@@ -129,7 +129,7 @@ mod tests {
         .await
         .unwrap();
 
-        assert_eq!(result, "uri1".to_string());
+        assert_eq!(result, "test/uri1".parse().unwrap());
     }
 
     #[tokio::test]
@@ -162,7 +162,7 @@ mod tests {
             user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
-                uri: "uri1".into(),
+                uri: "test/uri1".parse().unwrap(),
             }],
         };
 

@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::{package_name::PackageName, username::Username, IVersion};
+use crate::{package_name::PackageName, username::Username, IVersion, WrapUri};
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Package {
@@ -13,7 +13,7 @@ pub struct Package {
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Version {
     pub name: String,
-    pub uri: String,
+    pub uri: WrapUri,
 }
 
 impl IVersion for Version {
@@ -31,9 +31,4 @@ impl IVersion for PartialVersion {
     fn name(&self) -> String {
         self.name.clone()
     }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct UriResponse {
-    pub uri: String,
 }

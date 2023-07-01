@@ -20,6 +20,8 @@ pub async fn publish(
     let (username, package_name, version_name) =
         get_username_package_and_version(user, &package_and_version)?;
 
+    let uri = uri.parse().map_err(|_| StatusCode::BAD_REQUEST)?;
+
     account_service
         .verify_user_key(&username, &api_key)
         .await
@@ -89,13 +91,13 @@ mod tests {
             user: "user1".parse().unwrap(),
             versions: vec![Version {
                 name: "1.0.0".into(),
-                uri: "uri1".into(),
+                uri: "test/uri1".parse().unwrap(),
             }],
         };
 
         let new_version = Version {
             name: "2.0.0".into(),
-            uri: "uri2".into(),
+            uri: "test/uri2".parse().unwrap(),
         };
 
         let mut package_repo = MockPackageRepository::new();
@@ -126,7 +128,7 @@ mod tests {
         publish(
             "user1".into(),
             "package1@2.0.0".into(),
-            "uri2".into(),
+            "test/uri2".parse().unwrap(),
             "key1".into(),
             package_repo,
             account_service,

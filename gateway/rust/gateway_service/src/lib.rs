@@ -6,6 +6,9 @@ mod dynamodb;
 mod repository;
 pub use repository::*;
 
+mod wrap_uri;
+pub use wrap_uri::WrapUri;
+
 mod models;
 pub use models::*;
 
