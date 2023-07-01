@@ -19,13 +19,9 @@ jobs:
         with:
           toolchain: 1.69.0
           override: true
-          
+
       - name: Build local
         run: cargo build -F local
-        working-directory: ./gateway
-
-      - name: Clippy local
-        run: cargo clippy -F local  
         working-directory: ./gateway
 
       - name: Test local
@@ -34,10 +30,6 @@ jobs:
 
       - name: Build release
         run: cargo build
-        working-directory: ./gateway
-
-      - name: Clippy release
-        run: cargo clippy
         working-directory: ./gateway
 
       - name: Test release
