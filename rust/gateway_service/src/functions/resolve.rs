@@ -1,7 +1,7 @@
-use axum::{body::BoxBody, http::StatusCode, response::Response};
+use axum::http::StatusCode;
 
 use crate::{
-    constants, debug, debug_println, get_username_package_and_version, resolve_package,
+    debug, debug_println, get_username_package_and_version, resolve_package,
     resolving::ResolveError, Package, Repository,
 };
 
@@ -10,7 +10,7 @@ pub async fn resolve(
     package_and_version: String,
     _file_path: String,
     package_repo: impl Repository<Package>,
-) -> Result<Response, StatusCode> {
+) -> Result<String, StatusCode> {
     debug!(&user, &package_and_version, &_file_path);
 
     let (username, package_name, version_name) =
@@ -30,22 +30,16 @@ pub async fn resolve(
             }
         })?;
 
-    let response: Response = Response::builder()
-        .status(StatusCode::OK)
-        .header(constants::WRAP_URI_HEADER, uri)
-        .body(BoxBody::default())
-        .unwrap();
-
-    Ok(response)
+    Ok(uri)
 }
 
 #[cfg(test)]
 mod tests {
     use async_trait::async_trait;
-    use axum::{http::StatusCode, Json};
+    use axum::http::StatusCode;
     use mockall::{mock, predicate::eq};
 
-    use crate::{functions::resolve, Package, Repository, RepositoryError, UriResponse, Version};
+    use crate::{functions::resolve, Package, Repository, RepositoryError, Version};
 
     mock! {
       PackageRepository {}
@@ -91,15 +85,10 @@ mod tests {
             "some/path".into(),
             package_repo,
         )
-        .await;
+        .await
+        .unwrap();
 
-        let expected_response = UriResponse {
-            uri: "uri2".to_string(),
-        };
-
-        let _: Result<Json<UriResponse>, StatusCode> = Ok(Json(expected_response));
-
-        assert!(matches!(result, _));
+        assert_eq!(result, "uri2".to_string());
     }
 
     #[tokio::test]
@@ -137,15 +126,10 @@ mod tests {
             "some/path".into(),
             package_repo,
         )
-        .await;
+        .await
+        .unwrap();
 
-        let expected_response = UriResponse {
-            uri: "uri1".to_string(),
-        };
-
-        let _: Result<Json<UriResponse>, StatusCode> = Ok(Json(expected_response));
-
-        assert!(matches!(result, _));
+        assert_eq!(result, "uri1".to_string());
     }
 
     #[tokio::test]

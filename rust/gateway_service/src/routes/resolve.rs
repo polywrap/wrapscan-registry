@@ -1,5 +1,6 @@
 use aws_sdk_dynamodb::Client;
 use axum::{
+    body::BoxBody,
     extract::{Path, State},
     response::Response,
 };
@@ -13,7 +14,15 @@ pub async fn resolve(
 ) -> Result<Response, StatusCode> {
     let package_repo = get_package_repository(client).await;
 
-    functions::resolve(user, package_and_version, file_path, package_repo).await
+    let uri = functions::resolve(user, package_and_version, file_path, package_repo).await?;
+
+    let response: Response = Response::builder()
+        .status(StatusCode::OK)
+        .header(constants::WRAP_URI_HEADER, uri)
+        .body(BoxBody::default())
+        .unwrap();
+
+    Ok(response)
 }
 
 async fn get_package_repository(dynamodb_client: Client) -> impl Repository<Package> {

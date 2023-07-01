@@ -1,4 +1,4 @@
-use axum::{body::BoxBody, http::StatusCode, response::Response};
+use axum::http::StatusCode;
 
 use crate::{
     accounts::KeyValidationError,
@@ -14,7 +14,7 @@ pub async fn publish(
     api_key: String,
     package_repo: impl Repository<Package>,
     account_service: impl AccountService,
-) -> Result<Response, StatusCode> {
+) -> Result<(), StatusCode> {
     debug!(&user, &package_and_version, &uri, &api_key);
 
     let (username, package_name, version_name) =
@@ -51,18 +51,12 @@ pub async fn publish(
             }
         })?;
 
-    let response = Response::builder()
-        .status(StatusCode::OK)
-        .body(BoxBody::default())
-        .unwrap();
-
-    Ok(response)
+    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use async_trait::async_trait;
-    use axum::http::StatusCode;
     use mockall::{mock, predicate::eq};
 
     use crate::{
@@ -129,7 +123,7 @@ mod tests {
                 .return_once(move |_| Ok(()));
         }
 
-        let result = publish(
+        publish(
             "user1".into(),
             "package1@2.0.0".into(),
             "uri2".into(),
@@ -139,7 +133,5 @@ mod tests {
         )
         .await
         .unwrap();
-
-        assert!(matches!(result.status(), StatusCode::OK));
     }
 }

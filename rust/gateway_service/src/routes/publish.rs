@@ -1,5 +1,6 @@
 use aws_sdk_dynamodb::Client;
 use axum::{
+    body::BoxBody,
     extract::{Path, State},
     response::Response,
     Json,
@@ -31,7 +32,14 @@ pub async fn publish(
         package_repo,
         account_service,
     )
-    .await
+    .await?;
+
+    let response = Response::builder()
+        .status(StatusCode::OK)
+        .body(BoxBody::default())
+        .unwrap();
+
+    Ok(response)
 }
 
 fn extract_api_key_from_headers(headers: HeaderMap) -> Result<String, StatusCode> {
