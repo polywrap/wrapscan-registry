@@ -1,4 +1,4 @@
-use axum::{body::BoxBody, extract::Path, http::StatusCode, response::Response};
+use axum::{body::BoxBody, http::StatusCode, response::Response};
 
 use crate::{
     constants, debug, debug_println, get_username_package_and_version, resolve_package,
@@ -6,7 +6,9 @@ use crate::{
 };
 
 pub async fn resolve(
-    Path((user, package_and_version, _file_path)): Path<(String, String, String)>,
+    user: String,
+    package_and_version: String,
+    _file_path: String,
     package_repo: impl Repository<Package>,
 ) -> Result<Response, StatusCode> {
     debug!(&user, &package_and_version, &_file_path);
@@ -40,7 +42,7 @@ pub async fn resolve(
 #[cfg(test)]
 mod tests {
     use async_trait::async_trait;
-    use axum::{extract::Path, http::StatusCode, Json};
+    use axum::{http::StatusCode, Json};
     use mockall::{mock, predicate::eq};
 
     use crate::{functions::resolve, Package, Repository, RepositoryError, UriResponse, Version};
@@ -84,7 +86,9 @@ mod tests {
             .return_once(move |_| Ok(package));
 
         let result = resolve(
-            Path(("user1".into(), "package1".into(), "some/path".into())),
+            "user1".into(),
+            "package1".into(),
+            "some/path".into(),
             package_repo,
         )
         .await;
@@ -128,7 +132,9 @@ mod tests {
             .return_once(move |_| Ok(package));
 
         let result = resolve(
-            Path(("user1".into(), "package1@1.0.1".into(), "some/path".into())),
+            "user1".into(),
+            "package1@1.0.1".into(),
+            "some/path".into(),
             package_repo,
         )
         .await;
@@ -152,7 +158,9 @@ mod tests {
             .return_once(move |_| Err(RepositoryError::NotFound));
 
         let result = resolve(
-            Path(("user1".into(), "package1".into(), "some/path".into())),
+            "user1".into(),
+            "package1".into(),
+            "some/path".into(),
             package_repo,
         )
         .await;
@@ -180,7 +188,9 @@ mod tests {
             .return_once(move |_| Ok(package));
 
         let result = resolve(
-            Path(("user1".into(), "package1@2.0.0".into(), "some/path".into())),
+            "user1".into(),
+            "package1@1.0.1".into(),
+            "some/path".into(),
             package_repo,
         )
         .await;
@@ -195,7 +205,9 @@ mod tests {
         package_repo.expect_read().times(0);
 
         let result = resolve(
-            Path(("user1".into(), "pack!age1@1.0.0".into(), "some/path".into())),
+            "user1".into(),
+            "pack!age1@1.0.0".into(),
+            "some/path".into(),
             package_repo,
         )
         .await;
@@ -210,7 +222,9 @@ mod tests {
         package_repo.expect_read().times(0);
 
         let result = resolve(
-            Path(("user1".into(), "pack age1@1.0.0".into(), "some/path".into())),
+            "user1".into(),
+            "pack age1@1.0.0".into(),
+            "some/path".into(),
             package_repo,
         )
         .await;

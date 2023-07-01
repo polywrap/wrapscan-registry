@@ -1,23 +1,17 @@
-use axum::{
-    body::BoxBody,
-    extract::Path,
-    http::{HeaderMap, StatusCode},
-    response::Response,
-    Json,
-};
+use axum::{body::BoxBody, http::StatusCode, response::Response};
 
 use crate::{
     account_service::KeyValidationError,
     debug, debug_println, get_username_package_and_version,
     publishing::{publish_package, PublishError},
-    routes::UriBody,
     AccountService, Package, Repository,
 };
 
 pub async fn publish(
-    Path((user, package_and_version)): Path<(String, String)>,
-    Json(UriBody { uri }): Json<UriBody>,
-    headers: HeaderMap,
+    user: String,
+    package_and_version: String,
+    uri: String,
+    api_key: String,
     package_repo: impl Repository<Package>,
     account_service: impl AccountService,
 ) -> Result<Response, StatusCode> {
@@ -25,8 +19,6 @@ pub async fn publish(
 
     let (username, package_name, version_name) =
         get_username_package_and_version(user, &package_and_version)?;
-
-    let api_key = get_api_key(headers)?;
 
     account_service
         .verify_user_key(&username, &api_key)
@@ -67,35 +59,15 @@ pub async fn publish(
     Ok(response)
 }
 
-fn get_api_key(headers: HeaderMap) -> Result<String, StatusCode> {
-    // Get authentication header and validate it
-    let api_key = headers
-        .get("Authorization")
-        .ok_or(StatusCode::UNAUTHORIZED)?
-        .to_str()
-        .map_err(|_| StatusCode::UNAUTHORIZED)?
-        .trim_start_matches("Bearer ")
-        .to_string();
-
-    // Decode the api key
-    let api_key = base64::decode(api_key).map_err(|_| StatusCode::UNAUTHORIZED)?;
-
-    String::from_utf8(api_key).map_err(|_| StatusCode::UNAUTHORIZED)
-}
-
 #[cfg(test)]
 mod tests {
     use async_trait::async_trait;
-    use axum::{
-        extract::Path,
-        http::{HeaderMap, StatusCode},
-        Json,
-    };
+    use axum::http::StatusCode;
     use mockall::{mock, predicate::eq};
 
     use crate::{
-        functions::publish, routes::UriBody, username::Username, AccountService,
-        KeyValidationError, Package, Repository, RepositoryError, Version,
+        functions::publish, username::Username, AccountService, KeyValidationError, Package,
+        Repository, RepositoryError, Version,
     };
 
     mock! {
@@ -157,19 +129,11 @@ mod tests {
                 .return_once(move |_| Ok(()));
         }
 
-        let body: Json<UriBody> = Json(UriBody { uri: "uri2".into() });
-        let mut headers = HeaderMap::new();
-        headers.insert(
-            "Authorization",
-            format!("Bearer {}", base64::encode("key1"))
-                .parse()
-                .unwrap(),
-        );
-
         let result = publish(
-            Path(("user1".into(), "package1@2.0.0".into())),
-            body,
-            headers,
+            "user1".into(),
+            "package1@2.0.0".into(),
+            "uri2".into(),
+            "key1".into(),
             package_repo,
             account_service,
         )

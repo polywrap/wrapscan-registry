@@ -1,5 +1,5 @@
-mod routes;
-pub use routes::setup_routes;
+mod setup_routes;
+pub use setup_routes::setup_routes;
 
 mod dynamodb;
 
@@ -38,6 +38,8 @@ mod get_username_package_and_version;
 use get_username_package_and_version::get_username_package_and_version;
 
 mod debug;
+
+mod routes;
 
 #[cfg(feature = "local")]
 mod local_db;
