@@ -1,5 +1,3 @@
-use std::fs;
-
 use aws_config::{meta::region::RegionProviderChain, SdkConfig};
 use aws_sdk_dynamodb::{
     config::Region,
@@ -10,20 +8,9 @@ use aws_sdk_dynamodb::{
     Client,
 };
 
-use axum::{
-    extract::Path,
-    http::{HeaderMap, StatusCode},
-    response::Response,
-    routing::{get, post},
-    Json, Router,
-};
 use clap::Parser;
-use lambda_http::{run, Error as HttpError};
 
-use crate::{
-    constants, dynamodb::PackageRepository, functions, setup_logging, AccountService, Package,
-    RemoteAccountService, Repository, SingleAccountService,
-};
+use crate::constants;
 
 pub async fn get_dynamodb_client() -> Client {
     let config = make_config(Opt::parse()).await.unwrap();

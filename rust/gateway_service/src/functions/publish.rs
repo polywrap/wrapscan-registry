@@ -15,7 +15,7 @@ pub async fn publish(
     package_repo: impl Repository<Package>,
     account_service: impl AccountService,
 ) -> Result<Response, StatusCode> {
-    debug!(&user, &package_and_version, &headers);
+    debug!(&user, &package_and_version, &uri, &api_key);
 
     let (username, package_name, version_name) =
         get_username_package_and_version(user, &package_and_version)?;
