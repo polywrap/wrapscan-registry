@@ -47,12 +47,7 @@ pub async fn publish_package(
 
         package
     } else {
-        Package {
-            id: id.clone(),
-            name: package_name.clone(),
-            user: user.clone(),
-            versions: vec![],
-        }
+        Package::new(package_name.clone(), user.clone())
     };
 
     package
@@ -99,6 +94,7 @@ mod tests {
                 uri: "test/uri1".parse().unwrap(),
                 created_on: 0,
             }],
+            created_on: 0,
         };
 
         let new_version = Version {
@@ -146,6 +142,7 @@ mod tests {
                 uri: "test/uri1".parse().unwrap(),
                 created_on: 0,
             }],
+            created_on: 0,
         };
 
         let mut package_repo = MockPackageRepository::new();
@@ -183,6 +180,7 @@ mod tests {
                 uri: "test/uri1".parse().unwrap(),
                 created_on: 0,
             }],
+            created_on: 0,
         };
 
         let mut package_repo = MockPackageRepository::new();

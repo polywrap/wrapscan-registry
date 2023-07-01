@@ -75,6 +75,7 @@ mod tests {
                     created_on: 0,
                 },
             ],
+            created_on: 0,
         };
 
         package_repo
@@ -119,6 +120,7 @@ mod tests {
                     created_on: 0,
                 },
             ],
+            created_on: 0,
         };
 
         package_repo
@@ -171,6 +173,7 @@ mod tests {
                 uri: "test/uri1".parse().unwrap(),
                 created_on: 0,
             }],
+            created_on: 0,
         };
 
         package_repo

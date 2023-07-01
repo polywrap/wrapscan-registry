@@ -92,6 +92,7 @@ mod tests {
                     created_on: 0,
                 },
             ],
+            created_on: 0,
         };
 
         mock_repo
@@ -129,6 +130,7 @@ mod tests {
                     created_on: 0,
                 },
             ],
+            created_on: 0,
         };
 
         mock_repo
@@ -166,6 +168,7 @@ mod tests {
                     created_on: 0,
                 },
             ],
+            created_on: 0,
         };
 
         mock_repo

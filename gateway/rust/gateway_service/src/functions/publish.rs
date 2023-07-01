@@ -94,6 +94,7 @@ mod tests {
                 uri: "test/uri1".parse().unwrap(),
                 created_on: 0,
             }],
+            created_on: 0,
         };
 
         let new_version = Version {

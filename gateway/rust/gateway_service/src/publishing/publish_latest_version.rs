@@ -54,12 +54,7 @@ mod tests {
 
     #[tokio::test]
     async fn can_publish_latest_version_when_no_versions_published() {
-        let mut package = Package {
-            id: "user1/package1".into(),
-            name: "package1".parse().unwrap(),
-            user: "user1".parse().unwrap(),
-            versions: vec![],
-        };
+        let mut package = Package::new("package1".parse().unwrap(), "user1".parse().unwrap());
 
         let update_package = Package {
             id: "user1/package1".into(),
@@ -70,6 +65,7 @@ mod tests {
                 uri: "test/uri_latest".parse().unwrap(),
                 created_on: 0,
             }],
+            created_on: 0,
         };
 
         let mut mock_package_repo = MockPackageRepository::new();
@@ -114,6 +110,7 @@ mod tests {
                 uri: "test/uri1".parse().unwrap(),
                 created_on: 0,
             }],
+            created_on: 0,
         };
 
         let update_package = Package {
@@ -125,6 +122,7 @@ mod tests {
                 uri: "test/uri_latest".parse().unwrap(),
                 created_on: 0,
             }],
+            created_on: 0,
         };
 
         let mut mock_package_repo = MockPackageRepository::new();
@@ -169,6 +167,7 @@ mod tests {
                 uri: "test/uri1".parse().unwrap(),
                 created_on: 0,
             }],
+            created_on: 0,
         };
 
         let mut mock_package_repo = MockPackageRepository::new();
@@ -202,6 +201,7 @@ mod tests {
                     created_on: 0,
                 },
             ],
+            created_on: 0,
         };
 
         let mut mock_package_repo = MockPackageRepository::new();
@@ -224,6 +224,7 @@ mod tests {
             name: "package1".parse().unwrap(),
             user: "user1".parse().unwrap(),
             versions: vec![],
+            created_on: 0,
         };
 
         let update_package = Package {
@@ -235,6 +236,7 @@ mod tests {
                 uri: "test/uri_latest".parse().unwrap(),
                 created_on: 0,
             }],
+            created_on: 0,
         };
 
         let mut mock_package_repo = MockPackageRepository::new();
