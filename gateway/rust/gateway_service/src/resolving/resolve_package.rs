@@ -84,10 +84,12 @@ mod tests {
                 Version {
                     name: "1.0.0".to_string(),
                     uri: "test/uri1".parse().unwrap(),
+                    created_on: 0,
                 },
                 Version {
                     name: "2.0.0".to_string(),
                     uri: "test/uri2".parse().unwrap(),
+                    created_on: 0,
                 },
             ],
         };
@@ -119,10 +121,12 @@ mod tests {
                 Version {
                     name: "1.0.0".to_string(),
                     uri: "test/uri1".parse().unwrap(),
+                    created_on: 0,
                 },
                 Version {
                     name: "2.0.0".to_string(),
                     uri: "test/uri2".parse().unwrap(),
+                    created_on: 0,
                 },
             ],
         };
@@ -154,10 +158,12 @@ mod tests {
                 Version {
                     name: "1.0.0".to_string(),
                     uri: "test/uri1".parse().unwrap(),
+                    created_on: 0,
                 },
                 Version {
                     name: "2.0.0".to_string(),
                     uri: "test/uri2".parse().unwrap(),
+                    created_on: 0,
                 },
             ],
         };

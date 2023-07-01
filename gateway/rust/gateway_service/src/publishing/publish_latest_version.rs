@@ -20,10 +20,9 @@ pub async fn publish_latest_version(
 
         existing_version.uri = uri;
     } else {
-        package.versions.push(Version {
-            name: "latest".to_string(),
-            uri: uri.clone(),
-        });
+        package
+            .versions
+            .push(Version::new("latest".to_string(), uri.clone()));
     }
 
     package_repo
@@ -69,6 +68,7 @@ mod tests {
             versions: vec![Version {
                 name: "latest".into(),
                 uri: "test/uri_latest".parse().unwrap(),
+                created_on: 0,
             }],
         };
 
@@ -112,6 +112,7 @@ mod tests {
             versions: vec![Version {
                 name: "latest".into(),
                 uri: "test/uri1".parse().unwrap(),
+                created_on: 0,
             }],
         };
 
@@ -122,6 +123,7 @@ mod tests {
             versions: vec![Version {
                 name: "latest".into(),
                 uri: "test/uri_latest".parse().unwrap(),
+                created_on: 0,
             }],
         };
 
@@ -165,6 +167,7 @@ mod tests {
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "test/uri1".parse().unwrap(),
+                created_on: 0,
             }],
         };
 
@@ -191,10 +194,12 @@ mod tests {
                 Version {
                     name: "1.0.0".into(),
                     uri: "test/uri1".parse().unwrap(),
+                    created_on: 0,
                 },
                 Version {
                     name: "1.0.1".into(),
                     uri: "test/uri2".parse().unwrap(),
+                    created_on: 0,
                 },
             ],
         };
@@ -228,6 +233,7 @@ mod tests {
             versions: vec![Version {
                 name: "latest".into(),
                 uri: "test/uri_latest".parse().unwrap(),
+                created_on: 0,
             }],
         };
 

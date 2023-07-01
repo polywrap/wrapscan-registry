@@ -55,10 +55,9 @@ pub async fn publish_package(
         }
     };
 
-    package.versions.push(Version {
-        name: new_version.to_string(),
-        uri,
-    });
+    package
+        .versions
+        .push(Version::new(new_version.to_string(), uri));
 
     semver::sort_versions(&mut package.versions);
 
@@ -98,12 +97,14 @@ mod tests {
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "test/uri1".parse().unwrap(),
+                created_on: 0,
             }],
         };
 
         let new_version = Version {
             name: "2.0.0".into(),
             uri: "test/uri2".parse().unwrap(),
+            created_on: 0,
         };
 
         let mut package_repo = MockPackageRepository::new();
@@ -143,6 +144,7 @@ mod tests {
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "test/uri1".parse().unwrap(),
+                created_on: 0,
             }],
         };
 
@@ -179,6 +181,7 @@ mod tests {
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "test/uri1".parse().unwrap(),
+                created_on: 0,
             }],
         };
 

@@ -92,12 +92,14 @@ mod tests {
             versions: vec![Version {
                 name: "1.0.0".into(),
                 uri: "test/uri1".parse().unwrap(),
+                created_on: 0,
             }],
         };
 
         let new_version = Version {
             name: "2.0.0".into(),
             uri: "test/uri2".parse().unwrap(),
+            created_on: 0,
         };
 
         let mut package_repo = MockPackageRepository::new();
