@@ -1,3 +1,4 @@
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const ENV_PACKAGES_TABLE: &str = "PACKAGES_TABLE";
 pub const ENV_ACCOUNT_SERVICE_URL: &str = "ACCOUNT_SERVICE_URL";
 pub const ENV_WRAP_USER_KEY: &str = "WRAP_USER_KEY";

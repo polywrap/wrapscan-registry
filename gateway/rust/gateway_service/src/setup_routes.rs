@@ -33,12 +33,13 @@ pub async fn setup_routes() -> Result<(), HttpError> {
     };
 
     let app = Router::new()
+        .route("/", get(routes::home).with_state(deps.clone()))
         .route(
-            "/dev/u/:user/:packageAndVersion/*filePath",
+            "/r/:user/:packageAndVersion/*filePath",
             get(routes::resolve).with_state(deps.clone()),
         )
         .route(
-            "/dev/u/:user/:packageAndVersion",
+            "/r/:user/:packageAndVersion",
             post(routes::publish).with_state(deps),
         );
 

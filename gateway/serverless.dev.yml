@@ -47,12 +47,21 @@ custom:
   packagesTable: wraps-table-dev
 
 functions:
+  home:
+    handler: gateway_service
+    runtime: rust
+    events:
+      - http:
+          path: /
+          method: get
+          cors: true
+
   publish:
     handler: gateway_service
     runtime: rust
     events:
       - http:
-          path: u/{user}/{packageAndVersion}
+          path: r/{user}/{packageAndVersion}
           method: post
           cors: true
   resolve:
@@ -60,7 +69,7 @@ functions:
     runtime: rust
     events:
       - http:
-          path: u/{user}/{packageAndVersion}/{filePath}
+          path: r/{user}/{packageAndVersion}/{filePath}
           method: get
           cors: true
 

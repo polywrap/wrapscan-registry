@@ -9,7 +9,7 @@
     "deploy:prod": "npx serverless deploy --config ./serverless.prod.yml",
     "test": "cargo test -F local && cargo test",
     "package": "npx serverless package",
-    "db": "cargo run -F local",
+    "db": "docker-compose up",
     "dev": "cargo run -F local"
   },
   "devDependencies": {

@@ -1,3 +1,6 @@
+mod home;
+pub use home::*;
+
 mod publish;
 pub use publish::*;
 
