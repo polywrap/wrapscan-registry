@@ -1,4 +1,4 @@
-service: wrapscan-registry-gateway
+service: wrapscan-registry-gateway-dev
 
 plugins:
   - serverless-domain-manager
