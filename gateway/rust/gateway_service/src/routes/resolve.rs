@@ -1,4 +1,3 @@
-use aws_sdk_dynamodb::Client;
 use axum::{
     body::BoxBody,
     extract::{Path, State},
@@ -6,13 +5,18 @@ use axum::{
 };
 use http::StatusCode;
 
-use crate::{constants, dynamodb::PackageRepository, functions, models::Package, Repository};
+use crate::{constants, debug_println, functions, models::Package, Repository};
 
-pub async fn resolve(
+use super::Dependencies;
+
+pub async fn resolve<T>(
     Path((user, package_and_version, file_path)): Path<(String, String, String)>,
-    State(client): State<Client>,
-) -> Result<Response, StatusCode> {
-    let package_repo = get_package_repository(client).await;
+    State(deps): State<Dependencies<T>>,
+) -> Result<Response, StatusCode>
+where
+    T: Repository<Package>,
+{
+    let Dependencies { package_repo } = deps;
 
     let uri = functions::resolve(user, package_and_version, file_path, package_repo).await?;
 
@@ -20,14 +24,11 @@ pub async fn resolve(
         .status(StatusCode::OK)
         .header(constants::WRAP_URI_HEADER, uri.to_string())
         .body(BoxBody::default())
-        .unwrap();
+        .map_err(|e| {
+            debug_println!("Error publishing package: {}", &e);
+            eprintln!("INTERNAL_SERVER_ERROR constructing response: {:?}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
 
     Ok(response)
-}
-
-async fn get_package_repository(dynamodb_client: Client) -> impl Repository<Package> {
-    let table_name =
-        std::env::var(constants::ENV_PACKAGES_TABLE).expect("ENV_PACKAGES_TABLE not set");
-
-    PackageRepository::new(dynamodb_client, table_name)
 }

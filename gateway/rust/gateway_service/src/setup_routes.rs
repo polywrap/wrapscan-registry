@@ -6,7 +6,12 @@ use axum::{
 };
 use lambda_http::{run, Error as HttpError};
 
-use crate::{routes, setup_logging};
+use crate::{
+    constants,
+    dynamodb::PackageRepository,
+    routes::{self, Dependencies},
+    setup_logging,
+};
 
 pub async fn setup_routes() -> Result<(), HttpError> {
     setup_logging();
@@ -20,15 +25,21 @@ pub async fn setup_routes() -> Result<(), HttpError> {
     }
 
     let dynamodb_client = get_dynamodb_client().await;
+    let table_name =
+        std::env::var(constants::ENV_PACKAGES_TABLE).expect("ENV_PACKAGES_TABLE not set");
+    let package_repo = PackageRepository::new(dynamodb_client, table_name);
+    let deps = Dependencies {
+        package_repo: package_repo.clone(),
+    };
 
     let app = Router::new()
         .route(
             "/dev/u/:user/:packageAndVersion/*filePath",
-            get(routes::resolve).with_state(dynamodb_client.clone()),
+            get(routes::resolve).with_state(deps.clone()),
         )
         .route(
             "/dev/u/:user/:packageAndVersion",
-            post(routes::publish).with_state(dynamodb_client.clone()),
+            post(routes::publish).with_state(deps),
         );
 
     #[cfg(not(feature = "local"))]

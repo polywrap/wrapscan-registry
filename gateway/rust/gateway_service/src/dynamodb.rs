@@ -8,6 +8,7 @@ use aws_sdk_dynamodb::Client;
 use crate::models::Package;
 use crate::{constants, debug, Repository, RepositoryError};
 
+#[derive(Clone)]
 pub struct PackageRepository {
     client: Client,
     table_name: String,
