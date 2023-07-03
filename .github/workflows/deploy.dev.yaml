@@ -1,0 +1,59 @@
+name: Gateway Deploy Dev
+
+on:
+  push: 
+    branches:
+      - develop
+
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.69.0
+          override: true   
+
+      - name: Build release
+        run: cargo build
+        working-directory: ./gateway
+
+      - name: Test release
+        run: cargo test
+        working-directory: ./gateway
+
+      - name: Read .nvmrc
+          run: echo ::set-output name=NVMRC::$(cat .nvmrc)
+          id: nvm
+        working-directory: ./gateway
+
+      - name: Setup Node.js
+        uses: actions/setup-node@master
+        with:
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
+        working-directory: ./gateway
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+        working-directory: ./gateway
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+        working-directory: ./gateway
+
+      - name: Install dependencies
+        run: (yarn install --nonInteractive --frozen-lockfile --prefer-offline || yarn install --nonInteractive --frozen-lockfile --prefer-offline)
+        working-directory: ./gateway
+
+      - name: Deploy dev
+        run: yarn deploy:dev
+        working-directory: ./gateway

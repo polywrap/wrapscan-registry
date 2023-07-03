@@ -1,8 +1,15 @@
 service: wrapscan-registry-gateway
+
+plugins:
+  - serverless-domain-manager
+  - serverless-rust
+
+package: 
+  individually: true
+
 provider:
   name: aws
   runtime: rust
-  stage: dev
   region: us-east-1
   memorySize: 128
   timeout: 3
@@ -21,9 +28,6 @@ provider:
     PACKAGES_TABLE: ${self:custom.packagesTable}
     WRAP_USER_KEY: ${self:custom.wrap_account.api_key}
 
-package: 
-  individually: true
-
 custom:
   serverless-offline:
     reloadHandler: true
@@ -31,24 +35,17 @@ custom:
     dockerless: true
   customDomain:
     domainName: wraps.wrapscan.com
-    stage: ${self:provider.stage}
     certificateName: wrapscan.com
     createRoute53Record: true
   dynamodb:
-    stages:
-      - dev
     start:
       port: 8001
       inMemory: true
       heapInitial: 200m
       heapMax: 1g
       migrate: true
-  packagesTable: 'wraps-table-${sls:stage}'
+  packagesTable: wraps-table
   wrap_account: ${ssm:/aws/reference/secretsmanager/wrap-account}
-
-plugins:
-  - serverless-domain-manager
-  - serverless-rust
 
 functions:
   publish:
