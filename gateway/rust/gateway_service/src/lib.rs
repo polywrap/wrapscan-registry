@@ -1,10 +1,8 @@
 mod setup_routes;
 pub use setup_routes::setup_routes;
 
-mod dynamodb;
-
-mod repository;
-pub use repository::*;
+mod db;
+pub use db::*;
 
 mod functions;
 
@@ -34,7 +32,7 @@ mod debug;
 
 mod routes;
 
-#[cfg(feature = "local")]
-mod local_db;
 mod models;
 use models::*;
+
+mod http_utils;

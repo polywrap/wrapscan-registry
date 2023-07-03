@@ -1,0 +1,88 @@
+service: wrapscan-registry-gateway
+
+plugins:
+  - serverless-domain-manager
+  - serverless-rust
+
+package: 
+  individually: true
+
+provider:
+  name: aws
+  runtime: rust
+  region: us-east-1
+  memorySize: 128
+  timeout: 3
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [ packagesTable, Arn ]
+  environment:
+    PACKAGES_TABLE: ${self:custom.packagesTable}
+    WRAP_USER_KEY: ${env:WRAP_USER_KEY}
+
+custom:
+  serverless-offline:
+    reloadHandler: true
+  rust:
+    dockerless: true
+  customDomain:
+    domainName: wraps-dev.wrapscan.com
+    certificateName: wraps-dev.wrapscan.com
+    createRoute53Record: true
+  dynamodb:
+    start:
+      port: 8001
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+  packagesTable: wraps-table-dev
+
+functions:
+  home:
+    handler: gateway_service
+    runtime: rust
+    events:
+      - http:
+          path: /
+          method: get
+          cors: true
+
+  publish:
+    handler: gateway_service
+    runtime: rust
+    events:
+      - http:
+          path: r/{user}/{packageAndVersion}
+          method: post
+          cors: true
+  resolve:
+    handler: gateway_service
+    runtime: rust
+    events:
+      - http:
+          path: r/{user}/{packageAndVersion}/{filePath}
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    packagesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:custom.packagesTable}

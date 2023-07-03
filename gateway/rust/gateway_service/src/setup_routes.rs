@@ -6,29 +6,49 @@ use axum::{
 };
 use lambda_http::{run, Error as HttpError};
 
-use crate::{routes, setup_logging};
+use crate::{
+    constants,
+    routes::{self, Dependencies},
+    setup_logging, PackageRepository,
+};
 
 pub async fn setup_routes() -> Result<(), HttpError> {
     setup_logging();
 
     #[cfg(feature = "local")]
     {
-        use crate::local_db;
-        dotenvy::dotenv()?;
-
-        crate::local_db::setup_local_db().await;
+        // TODO: placeholder until there's local env vars
+        //dotenvy::dotenv()?;
+        crate::db::local_db::setup_local_db().await;
     }
 
     let dynamodb_client = get_dynamodb_client().await;
 
+    let table_name = {
+        #[cfg(not(feature = "local"))]
+        {
+            std::env::var(constants::ENV_PACKAGES_TABLE).expect("ENV_PACKAGES_TABLE not set")
+        }
+        #[cfg(feature = "local")]
+        {
+            constants::PACKAGES_TABLE_LOCAL
+        }
+    };
+
+    let package_repo = PackageRepository::new(dynamodb_client, table_name.to_owned());
+    let deps = Dependencies {
+        package_repo: package_repo.clone(),
+    };
+
     let app = Router::new()
+        .route("/", get(routes::home).with_state(deps.clone()))
         .route(
-            "/dev/u/:user/:packageAndVersion/*filePath",
-            get(routes::resolve).with_state(dynamodb_client.clone()),
+            "/r/:user/:packageAndVersion/*filePath",
+            get(routes::resolve).with_state(deps.clone()),
         )
         .route(
-            "/dev/u/:user/:packageAndVersion",
-            post(routes::publish).with_state(dynamodb_client.clone()),
+            "/r/:user/:packageAndVersion",
+            post(routes::publish).with_state(deps),
         );
 
     #[cfg(not(feature = "local"))]
@@ -56,5 +76,5 @@ async fn get_dynamodb_client() -> Client {
 
 #[cfg(feature = "local")]
 async fn get_dynamodb_client() -> Client {
-    crate::local_db::get_dynamodb_client().await
+    crate::db::local_db::get_dynamodb_client().await
 }
