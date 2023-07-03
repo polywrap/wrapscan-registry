@@ -26,7 +26,7 @@ provider:
             - Fn::GetAtt: [ packagesTable, Arn ]
   environment:
     PACKAGES_TABLE: ${self:custom.packagesTable}
-    WRAP_USER_KEY: ${env:WRAP_USER_KEY_DEV}
+    WRAP_USER_KEY: ${env:WRAP_USER_KEY}
 
 custom:
   serverless-offline:
