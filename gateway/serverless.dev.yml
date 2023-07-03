@@ -1,4 +1,4 @@
-service: wrapscan-registry-gateway-dev
+service: wrapscan-registry-gateway
 
 plugins:
   - serverless-domain-manager
@@ -44,12 +44,11 @@ custom:
       heapInitial: 200m
       heapMax: 1g
       migrate: true
-  packagesTable: wraps-table-dev
+  packagesTable: wraps-table-${opt:stage}
 
 functions:
   home:
     handler: gateway_service
-    runtime: rust
     events:
       - http:
           path: /
@@ -58,7 +57,6 @@ functions:
 
   publish:
     handler: gateway_service
-    runtime: rust
     events:
       - http:
           path: r/{user}/{packageAndVersion}
@@ -66,7 +64,6 @@ functions:
           cors: true
   resolve:
     handler: gateway_service
-    runtime: rust
     events:
       - http:
           path: r/{user}/{packageAndVersion}/{filePath}

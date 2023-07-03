@@ -1,4 +1,4 @@
-service: wrapscan-registry-gateway-prod
+service: wrapscan-registry-gateway
 
 plugins:
   - serverless-domain-manager
@@ -44,13 +44,20 @@ custom:
       heapInitial: 200m
       heapMax: 1g
       migrate: true
-  packagesTable: wraps-table
+  packagesTable: wraps-table-${opt:stage}
   wrap_account: ${ssm:/aws/reference/secretsmanager/wrap-account}
 
 functions:
+  home:
+    handler: gateway_service
+    events:
+      - http:
+          path: /
+          method: get
+          cors: true
+          
   publish:
     handler: gateway_service
-    runtime: rust
     events:
       - http:
           path: u/{user}/{packageAndVersion}
@@ -58,7 +65,6 @@ functions:
           cors: true
   resolve:
     handler: gateway_service
-    runtime: rust
     events:
       - http:
           path: u/{user}/{packageAndVersion}/{filePath}
