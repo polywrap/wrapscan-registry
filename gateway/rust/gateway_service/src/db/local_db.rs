@@ -94,16 +94,5 @@ pub fn make_region_provider(region: Option<String>) -> RegionProviderChain {
 
 pub async fn make_config(opt: Opt) -> Result<SdkConfig, aws_sdk_dynamodb::Error> {
     let region_provider = make_region_provider(opt.region);
-
-    println!();
-    if opt.verbose {
-        println!("DynamoDB client version: {}", PKG_VERSION);
-        println!(
-            "Region:                  {}",
-            region_provider.region().await.unwrap().as_ref()
-        );
-        println!();
-    }
-
     Ok(aws_config::from_env().region(region_provider).load().await)
 }
