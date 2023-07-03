@@ -57,7 +57,7 @@ jobs:
         run: (yarn install --nonInteractive --frozen-lockfile --prefer-offline || yarn install --nonInteractive --frozen-lockfile --prefer-offline)
         working-directory: ./gateway
 
-      - name: Deploy dev
+      - name: Deploy
         run: yarn deploy:dev
         working-directory: ./gateway
         env:

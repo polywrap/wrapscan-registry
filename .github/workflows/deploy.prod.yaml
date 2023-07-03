@@ -20,12 +20,8 @@ jobs:
 
       - name: Setup build
         run: | 
-          sudo apt-get update
-          sudo apt-get -y install musl
           sudo apt install musl-tools
-          apk add --no-cache musl-dev
           rustup target add x86_64-unknown-linux-musl
-          export CC_x86_64_unknown_linux_musl=x86_64-linux-musl-gcc
 
       - name: Build release
         run: cargo build
@@ -64,3 +60,7 @@ jobs:
       - name: Deploy
         run: yarn deploy:prod
         working-directory: ./gateway
+        env:
+          WRAP_USER_KEY: ${{ secrets.WRAP_USER_KEY_PROD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
