@@ -22,6 +22,8 @@ jobs:
         run: | 
           sudo apt-get update
           sudo apt-get -y install musl
+          sudo apt install musl-tools
+          apk add --no-cache musl-dev
           rustup target add x86_64-unknown-linux-musl
           export CC_x86_64_unknown_linux_musl=x86_64-linux-musl-gcc
 
