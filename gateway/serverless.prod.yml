@@ -27,6 +27,7 @@ provider:
   environment:
     PACKAGES_TABLE: ${self:custom.packagesTable}
     WRAP_USER_KEY: ${self:custom.wrap_account.api_key}
+    DEPLOYMENT_STAGE: ${env:DEPLOYMENT_STAGE}
 
 custom:
   serverless-offline:
@@ -55,7 +56,7 @@ functions:
           path: /
           method: get
           cors: true
-          
+
   publish:
     handler: gateway_service
     events:

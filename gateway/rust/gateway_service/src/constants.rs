@@ -4,5 +4,6 @@ pub const ENV_ACCOUNT_SERVICE_URL: &str = "ACCOUNT_SERVICE_URL";
 pub const ENV_WRAP_USER_KEY: &str = "WRAP_USER_KEY";
 pub const WRAP_URI_HEADER: &str = "x-wrap-uri";
 pub const PACKAGES_TABLE_KEY_NAME: &str = "id";
+pub const ENV_STAGE: &str = "DEPLOYMENT_STAGE";
 #[cfg(feature = "local")]
 pub const PACKAGES_TABLE_LOCAL: &str = "wraps-table-dev";

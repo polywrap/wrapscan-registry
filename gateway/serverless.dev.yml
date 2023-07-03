@@ -27,7 +27,8 @@ provider:
   environment:
     PACKAGES_TABLE: ${self:custom.packagesTable}
     WRAP_USER_KEY: ${env:WRAP_USER_KEY}
-
+    DEPLOYMENT_STAGE: ${env:DEPLOYMENT_STAGE}
+    
 custom:
   serverless-offline:
     reloadHandler: true
