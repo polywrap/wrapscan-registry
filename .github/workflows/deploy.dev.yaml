@@ -56,4 +56,4 @@ jobs:
         run: yarn deploy:dev
         working-directory: ./gateway
         env:
-          WRAP_USER_KEY: ${{ secrets.WRAP_USER_KEY }}
+          WRAP_USER_KEY: ${{ secrets.WRAP_USER_KEY_DEV }}
