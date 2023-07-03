@@ -27,8 +27,7 @@ pub async fn get_dynamodb_client() -> Client {
 pub async fn setup_local_db() {
     println!("Setting up local DynamoDB...");
 
-    let table_name =
-        std::env::var(constants::ENV_PACKAGES_TABLE).expect("ENV_PACKAGES_TABLE not set");
+    let table_name = constants::PACKAGES_TABLE_LOCAL;
 
     let config = make_config(Opt::parse()).await.unwrap();
     let dynamodb_local_config = aws_sdk_dynamodb::config::Builder::from(&config)
@@ -40,7 +39,7 @@ pub async fn setup_local_db() {
 
     let client = Client::from_conf(dynamodb_local_config);
 
-    match client.describe_table().table_name(&table_name).send().await {
+    match client.describe_table().table_name(table_name).send().await {
         Ok(_) => {
             println!("Table `{}` already exists. Skipping.", &table_name);
             return;
@@ -65,7 +64,7 @@ pub async fn setup_local_db() {
 
     client
         .create_table()
-        .table_name(&table_name)
+        .table_name(table_name)
         .attribute_definitions(ad)
         .key_schema(ks)
         .provisioned_throughput(pt)
