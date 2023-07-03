@@ -27,8 +27,8 @@ jobs:
         working-directory: ./gateway
 
       - name: Read .nvmrc
-          run: echo ::set-output name=NVMRC::$(cat .nvmrc)
-          id: nvm
+        run: echo ::set-output name=NVMRC::$(cat .nvmrc)
+        id: nvm
         working-directory: ./gateway
 
       - name: Setup Node.js
