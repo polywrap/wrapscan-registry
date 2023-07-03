@@ -35,7 +35,6 @@ jobs:
         uses: actions/setup-node@master
         with:
           node-version: '${{ steps.nvm.outputs.NVMRC }}'
-        working-directory: ./gateway
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
