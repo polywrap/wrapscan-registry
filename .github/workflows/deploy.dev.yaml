@@ -24,11 +24,11 @@ jobs:
           rustup target add x86_64-unknown-linux-musl
 
       - name: Build release
-        run: cargo build
+        run: cargo build --release
         working-directory: ./gateway
 
       - name: Test release
-        run: cargo test
+        run: cargo test --release
         working-directory: ./gateway
 
       - name: Read .nvmrc
