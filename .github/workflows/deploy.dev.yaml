@@ -64,4 +64,4 @@ jobs:
           DEPLOYMENT_STAGE: dev
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-          WRAP_USER_KEY: ${{ secrets.POLYWRAP_WRAPSCAN_API_KEY_PROD }}
+          WRAP_USER_KEY: ${{ secrets.POLYWRAP_WRAPSCAN_API_KEY_DEV }}
