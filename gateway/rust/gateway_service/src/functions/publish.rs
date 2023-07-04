@@ -49,7 +49,9 @@ pub async fn publish(
         .map_err(log_error)
         .map_err(|e| match e {
             PublishError::InvalidVersionFormat => StatusCode::BAD_REQUEST,
-            PublishError::DuplicateVersion => StatusCode::BAD_REQUEST,
+            PublishError::DuplicateVersionName => StatusCode::BAD_REQUEST,
+            // If the version name and URI are the same, then we can just return OK since nothing needs to be change.
+            PublishError::DuplicateVersionNameAndUri => StatusCode::OK,
             PublishError::LatestVersionNotAllowed => StatusCode::BAD_REQUEST,
             PublishError::RepositoryError(e) => {
                 eprintln!("INTERNAL_SERVER_ERROR publishing package: {:?}", e);
