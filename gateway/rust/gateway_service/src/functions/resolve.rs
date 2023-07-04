@@ -21,7 +21,10 @@ pub async fn resolve(
 
     match file_path.as_str() {
         "wrap.info" => {}
-        _ => return Err(StatusCode::NOT_FOUND),
+        _ => {
+            debug_println!("Invalid file path: {:?}", &file_path);
+            return Err(StatusCode::NOT_FOUND);
+        }
     }
 
     let uri = resolve_package(&username, &package_name, version_name, &package_repo)
