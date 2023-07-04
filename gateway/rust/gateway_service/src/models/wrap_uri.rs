@@ -33,6 +33,14 @@ impl Display for WrapUri {
 #[derive(Debug)]
 pub struct UriParseError;
 
+impl Display for UriParseError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "Invalid WRAP URI")
+    }
+}
+
+impl std::error::Error for UriParseError {}
+
 impl FromStr for WrapUri {
     type Err = &'static UriParseError;
 

@@ -18,6 +18,14 @@ impl Display for Username {
 #[derive(Debug)]
 pub struct UsernameParseError;
 
+impl Display for UsernameParseError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "Invalid username")
+    }
+}
+
+impl std::error::Error for UsernameParseError {}
+
 impl FromStr for Username {
     type Err = &'static UsernameParseError;
 

@@ -18,6 +18,14 @@ impl Display for PackageName {
 #[derive(Debug)]
 pub struct PackageNameParseError;
 
+impl Display for PackageNameParseError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "Invalid package name")
+    }
+}
+
+impl std::error::Error for PackageNameParseError {}
+
 impl FromStr for PackageName {
     type Err = &'static PackageNameParseError;
 
