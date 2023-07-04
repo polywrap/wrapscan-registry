@@ -28,7 +28,7 @@ use accounts::*;
 mod get_username_package_and_version;
 use get_username_package_and_version::get_username_package_and_version;
 
-mod debug;
+mod debugging;
 
 mod routes;
 
