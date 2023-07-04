@@ -2,7 +2,9 @@ use axum::http::StatusCode;
 
 use crate::{
     accounts::KeyValidationError,
-    debug, debug_println, get_username_package_and_version,
+    debug, debug_println,
+    debugging::log_error,
+    get_username_package_and_version,
     models::Package,
     publishing::{publish_package, PublishError},
     AccountService, Repository,
@@ -21,36 +23,39 @@ pub async fn publish(
     let (username, package_name, version_name) =
         get_username_package_and_version(user, &package_and_version)?;
 
-    let uri = uri.parse().map_err(|_| StatusCode::BAD_REQUEST)?;
+    let uri = uri
+        .parse()
+        .map_err(log_error)
+        .map_err(|_| StatusCode::BAD_REQUEST)?;
+
+    debug_println!("Verifying API key: {:?}", &api_key);
 
     account_service
         .verify_user_key(&username, &api_key)
         .await
-        .map_err(|e| {
-            debug_println!("Error publishing package: {}", &e);
-
-            match e {
-                KeyValidationError::Invalid => StatusCode::UNAUTHORIZED,
-                KeyValidationError::Unknown(e) => {
-                    eprintln!("INTERNAL_SERVER_ERROR verifying user key: {:?}", e);
-                    StatusCode::INTERNAL_SERVER_ERROR
-                }
+        .map_err(log_error)
+        .map_err(|e| match e {
+            KeyValidationError::Invalid => StatusCode::UNAUTHORIZED,
+            KeyValidationError::Unknown(e) => {
+                eprintln!("INTERNAL_SERVER_ERROR verifying user key: {:?}", e);
+                StatusCode::INTERNAL_SERVER_ERROR
             }
         })?;
 
+    debug_println!("Publishing package: {:?}", &package_name);
+
     publish_package(&username, &package_name, version_name, uri, package_repo)
         .await
-        .map_err(|e| {
-            debug_println!("Error publishing package: {}", &e);
-
-            match e {
-                PublishError::InvalidVersionFormat => StatusCode::BAD_REQUEST,
-                PublishError::DuplicateVersion => StatusCode::BAD_REQUEST,
-                PublishError::LatestVersionNotAllowed => StatusCode::BAD_REQUEST,
-                PublishError::RepositoryError(e) => {
-                    eprintln!("INTERNAL_SERVER_ERROR publishing package: {:?}", e);
-                    StatusCode::INTERNAL_SERVER_ERROR
-                }
+        .map_err(log_error)
+        .map_err(|e| match e {
+            PublishError::InvalidVersionFormat => StatusCode::BAD_REQUEST,
+            PublishError::DuplicateVersionName => StatusCode::BAD_REQUEST,
+            // If the version name and URI are the same, then we can just return OK since nothing needs to be change.
+            PublishError::DuplicateVersionNameAndUri => StatusCode::OK,
+            PublishError::LatestVersionNotAllowed => StatusCode::BAD_REQUEST,
+            PublishError::RepositoryError(e) => {
+                eprintln!("INTERNAL_SERVER_ERROR publishing package: {:?}", e);
+                StatusCode::INTERNAL_SERVER_ERROR
             }
         })?;
 

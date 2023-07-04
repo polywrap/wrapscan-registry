@@ -18,7 +18,7 @@ where
 {
     let Dependencies { package_repo } = deps;
 
-    let uri = functions::resolve(user, package_and_version, file_path, package_repo).await?;
+    let uri = functions::resolve(user, package_and_version, file_path, &package_repo).await?;
 
     let response: Response = Response::builder()
         .status(StatusCode::OK)

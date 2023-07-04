@@ -24,11 +24,11 @@ jobs:
           rustup target add x86_64-unknown-linux-musl
 
       - name: Build release
-        run: cargo build
+        run: cargo build --release
         working-directory: ./gateway
 
       - name: Test release
-        run: cargo test
+        run: cargo test --release
         working-directory: ./gateway
 
       - name: Read .nvmrc
@@ -61,6 +61,6 @@ jobs:
         run: yarn deploy:prod
         working-directory: ./gateway
         env:
-          WRAP_USER_KEY: ${{ secrets.WRAP_USER_KEY_PROD }}
+          DEPLOYMENT_STAGE: prod
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}

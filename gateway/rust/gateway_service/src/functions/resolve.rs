@@ -11,15 +11,23 @@ use crate::{
 pub async fn resolve(
     user: String,
     package_and_version: String,
-    _file_path: String,
-    package_repo: impl Repository<Package>,
+    file_path: String,
+    package_repo: &impl Repository<Package>,
 ) -> Result<WrapUri, StatusCode> {
-    debug!(&user, &package_and_version, &_file_path);
+    debug!(&user, &package_and_version, &file_path);
 
     let (username, package_name, version_name) =
         get_username_package_and_version(user, &package_and_version)?;
 
-    let uri = resolve_package(&username, &package_name, version_name, &package_repo)
+    match file_path.as_str() {
+        "wrap.info" => {}
+        _ => {
+            debug_println!("Invalid file path: {:?}", &file_path);
+            return Err(StatusCode::NOT_FOUND);
+        }
+    }
+
+    let uri = resolve_package(&username, &package_name, version_name, package_repo)
         .await
         .map_err(|e| {
             debug_println!("Error resolving package: {}", &e);
@@ -89,8 +97,8 @@ mod tests {
         let result = resolve(
             "user1".into(),
             "package1".into(),
-            "some/path".into(),
-            package_repo,
+            "wrap.info".into(),
+            &package_repo,
         )
         .await
         .unwrap();
@@ -134,8 +142,8 @@ mod tests {
         let result = resolve(
             "user1".into(),
             "package1@1.0.1".into(),
-            "some/path".into(),
-            package_repo,
+            "wrap.info".into(),
+            &package_repo,
         )
         .await
         .unwrap();
@@ -156,7 +164,7 @@ mod tests {
             "user1".into(),
             "package1".into(),
             "some/path".into(),
-            package_repo,
+            &package_repo,
         )
         .await;
 
@@ -188,7 +196,7 @@ mod tests {
             "user1".into(),
             "package1@1.0.1".into(),
             "some/path".into(),
-            package_repo,
+            &package_repo,
         )
         .await;
 
@@ -205,7 +213,7 @@ mod tests {
             "user1".into(),
             "pack!age1@1.0.0".into(),
             "some/path".into(),
-            package_repo,
+            &package_repo,
         )
         .await;
 
@@ -222,7 +230,7 @@ mod tests {
             "user1".into(),
             "pack age1@1.0.0".into(),
             "some/path".into(),
-            package_repo,
+            &package_repo,
         )
         .await;
 

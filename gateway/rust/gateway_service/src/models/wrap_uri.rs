@@ -31,12 +31,20 @@ impl Display for WrapUri {
 }
 
 #[derive(Debug)]
-pub struct ParseError;
+pub struct UriParseError;
+
+impl Display for UriParseError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "Invalid WRAP URI")
+    }
+}
+
+impl std::error::Error for UriParseError {}
 
 impl FromStr for WrapUri {
-    type Err = &'static ParseError;
+    type Err = &'static UriParseError;
 
-    fn from_str(name: &str) -> Result<Self, Self::Err> {
-        Uri::try_from(name).map_err(|_| &ParseError).map(WrapUri)
+    fn from_str(uri: &str) -> Result<Self, Self::Err> {
+        Uri::try_from(uri).map_err(|_| &UriParseError).map(WrapUri)
     }
 }

@@ -7,7 +7,7 @@ use axum::{
 use http::{HeaderMap, StatusCode};
 
 use crate::{
-    accounts::AccountService, debug_println, http_utils::extract_api_key_from_headers,
+    accounts::AccountService, debugging::log_error, http_utils::extract_api_key_from_headers,
     models::Package, Repository,
 };
 use crate::{accounts::RemoteAccountService, constants, functions};
@@ -27,7 +27,7 @@ where
 
     let account_service = get_wrap_account_service().await;
 
-    let api_key = extract_api_key_from_headers(headers)?;
+    let api_key = extract_api_key_from_headers(headers).map_err(log_error)?;
 
     functions::publish(
         user,
@@ -42,8 +42,8 @@ where
     let response = Response::builder()
         .status(StatusCode::OK)
         .body(BoxBody::default())
+        .map_err(log_error)
         .map_err(|e| {
-            debug_println!("Error publishing package: {}", &e);
             eprintln!("INTERNAL_SERVER_ERROR constructing response: {:?}", e);
             StatusCode::INTERNAL_SERVER_ERROR
         })?;

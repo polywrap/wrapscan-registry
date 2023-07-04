@@ -27,15 +27,16 @@ provider:
   environment:
     PACKAGES_TABLE: ${self:custom.packagesTable}
     WRAP_USER_KEY: ${env:WRAP_USER_KEY}
-
+    DEPLOYMENT_STAGE: dev
+    
 custom:
   serverless-offline:
     reloadHandler: true
   rust:
     dockerless: true
   customDomain:
-    domainName: wraps-dev.wrapscan.com
-    certificateName: wraps-dev.wrapscan.com
+    domainName: dev.wraps.wrapscan.io
+    certificateName: dev.wraps.wrapscan.io
     createRoute53Record: true
   dynamodb:
     start:
@@ -49,7 +50,6 @@ custom:
 functions:
   home:
     handler: gateway_service
-    runtime: rust
     events:
       - http:
           path: /
@@ -58,15 +58,22 @@ functions:
 
   publish:
     handler: gateway_service
-    runtime: rust
     events:
       - http:
           path: r/{user}/{packageAndVersion}
           method: post
           cors: true
+
+  latestVersionInfo:
+    handler: gateway_service
+    events:
+      - http:
+          path: r/{user}/{packageAndVersion}
+          method: get
+          cors: true
+
   resolve:
     handler: gateway_service
-    runtime: rust
     events:
       - http:
           path: r/{user}/{packageAndVersion}/{filePath}

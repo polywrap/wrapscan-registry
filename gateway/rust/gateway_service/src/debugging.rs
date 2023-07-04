@@ -21,3 +21,15 @@ macro_rules! debug_println {
 macro_rules! debug_println {
     ($($x:tt)*) => {{}};
 }
+
+#[cfg(feature = "local")]
+pub fn log_error<E: std::fmt::Debug>(e: E) -> E {
+    debug_println!("Error: {:?}", &e);
+    e
+}
+
+#[cfg(not(feature = "local"))]
+pub fn log_error<E: std::fmt::Debug>(e: E) -> E {
+    debug!(&e);
+    e
+}

@@ -36,12 +36,15 @@ pub async fn publish_package(
             return publish_latest_version(&mut package, uri, package_repo).await;
         }
 
-        if package
+        let existing_version = package
             .versions
             .iter()
-            .any(|version| version.name == new_version)
-        {
-            return Err(PublishError::DuplicateVersion);
+            .find(|version| version.name == new_version);
+        if let Some(existing_version) = existing_version {
+            match existing_version.uri == uri {
+                true => return Err(PublishError::DuplicateVersionNameAndUri),
+                false => return Err(PublishError::DuplicateVersionName),
+            }
         }
 
         package
@@ -131,7 +134,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn forbids_publishing_duplicate_version() {
+    async fn forbids_publishing_duplicate_version_name() {
         let package = Package {
             id: "user1/package1".into(),
             name: "package1".parse().unwrap(),
@@ -165,7 +168,45 @@ mod tests {
         )
         .await;
 
-        assert_eq!(result, Err(PublishError::DuplicateVersion));
+        assert_eq!(result, Err(PublishError::DuplicateVersionName));
+    }
+
+    #[tokio::test]
+    async fn forbids_publishing_duplicate_version_name_and_uri() {
+        let package = Package {
+            id: "user1/package1".into(),
+            name: "package1".parse().unwrap(),
+            user: "user1".parse().unwrap(),
+            versions: vec![Version {
+                name: "1.0.0".into(),
+                uri: "test/uri1".parse().unwrap(),
+                created_on: 0,
+            }],
+            created_on: 0,
+        };
+
+        let mut package_repo = MockPackageRepository::new();
+
+        {
+            let package = package.clone();
+            package_repo
+                .expect_read()
+                .with(eq("user1/package1".to_string()))
+                .return_once(move |_| Ok(package));
+        }
+
+        package_repo.expect_update().never();
+
+        let result = publish_package(
+            &package.user,
+            &package.name,
+            Some("1.0.0"),
+            "test/uri1".parse().unwrap(),
+            package_repo,
+        )
+        .await;
+
+        assert_eq!(result, Err(PublishError::DuplicateVersionNameAndUri));
     }
 
     #[tokio::test]

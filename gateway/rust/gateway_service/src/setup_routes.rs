@@ -40,14 +40,32 @@ pub async fn setup_routes() -> Result<(), HttpError> {
         package_repo: package_repo.clone(),
     };
 
+    let route_prefix = {
+        #[cfg(not(feature = "local"))]
+        {
+            "/".to_string() + &std::env::var(constants::ENV_STAGE).expect("ENV_STAGE not set")
+        }
+        #[cfg(feature = "local")]
+        {
+            "".to_string()
+        }
+    };
+
     let app = Router::new()
-        .route("/", get(routes::home).with_state(deps.clone()))
         .route(
-            "/r/:user/:packageAndVersion/*filePath",
+            &(route_prefix.clone() + "/"),
+            get(routes::home).with_state(deps.clone()),
+        )
+        .route(
+            &(route_prefix.clone() + "/r/:user/:packageAndVersion"),
+            get(routes::latest_version_info).with_state(deps.clone()),
+        )
+        .route(
+            &(route_prefix.clone() + "/r/:user/:packageAndVersion/*filePath"),
             get(routes::resolve).with_state(deps.clone()),
         )
         .route(
-            "/r/:user/:packageAndVersion",
+            &(route_prefix + "/r/:user/:packageAndVersion"),
             post(routes::publish).with_state(deps),
         );
 

@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "build": "cargo build -F local && cargo build",
-    "deploy:dev": "npx serverless deploy --config ./serverless.dev.yml",
-    "deploy:prod": "npx serverless deploy --config ./serverless.prod.yml",
+    "deploy:dev": "npx serverless deploy --config ./serverless.dev.yml --stage dev",
+    "deploy:prod": "npx serverless deploy --config ./serverless.prod.yml --stage prod",
     "test": "cargo test -F local && cargo test",
     "package": "npx serverless package",
     "db": "docker-compose up",
