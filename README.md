@@ -12,6 +12,7 @@ The primary function of the registry is to facilitate the publishing of URIs, ac
     - Header `x-wrap-uri: wrap://...`
     - Status: 200
 - `POST /r/{user}/{package_and_version}` - Publish a URI for the wrap
+  - Header: `Authorization: Bearer {base64 encoded API key}`
   - Body: `{ uri: "wrap://..." }`
 
 ### How to run
@@ -52,7 +53,7 @@ default = ["local"]
 - `src/db/dynamodb.rs` contains DynamoDbClient and PackageRepository implementations for the production database
 
 ### Debugging
-- `src/debug.rs` contains debugging utilities
+- `src/debugging.rs` contains debugging utilities
 - To help with debugging locally, two macros are available (note they only work when the `local` feature flag is set):
   - `debug!` - is a wrapper around `dbg!`.
     - It prints the file and line number of the debug statement as well as the value of the expression passed.
