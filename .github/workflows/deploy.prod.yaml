@@ -61,7 +61,6 @@ jobs:
         run: yarn deploy:prod
         working-directory: ./gateway
         env:
-          WRAP_USER_KEY: ${{ secrets.WRAP_USER_KEY_PROD }}
+          DEPLOYMENT_STAGE: prod
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-          DEPLOYMENT_STAGE: prod
