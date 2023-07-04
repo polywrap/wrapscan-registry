@@ -14,7 +14,7 @@ pub async fn resolve(
     file_path: String,
     package_repo: impl Repository<Package>,
 ) -> Result<WrapUri, StatusCode> {
-    debug!(&user, &package_and_version, &_file_path);
+    debug!(&user, &package_and_version, &file_path);
 
     let (username, package_name, version_name) =
         get_username_package_and_version(user, &package_and_version)?;
@@ -94,7 +94,7 @@ mod tests {
         let result = resolve(
             "user1".into(),
             "package1".into(),
-            "some/path".into(),
+            "wrap.info".into(),
             package_repo,
         )
         .await
@@ -139,7 +139,7 @@ mod tests {
         let result = resolve(
             "user1".into(),
             "package1@1.0.1".into(),
-            "some/path".into(),
+            "wrap.info".into(),
             package_repo,
         )
         .await
