@@ -1,7 +1,6 @@
 use reqwest::StatusCode;
 
 use crate::{
-    debug,
     debugging::log_error,
     extract_package_and_version,
     models::{PackageName, Username},
