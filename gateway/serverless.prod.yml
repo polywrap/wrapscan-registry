@@ -64,6 +64,15 @@ functions:
           path: r/{user}/{packageAndVersion}
           method: post
           cors: true
+
+  latestVersionInfo:
+    handler: gateway_service
+    events:
+      - http:
+          path: r/{user}/{packageAndVersion}
+          method: get
+          cors: true
+
   resolve:
     handler: gateway_service
     events:
