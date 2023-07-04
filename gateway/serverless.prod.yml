@@ -27,7 +27,7 @@ provider:
   environment:
     PACKAGES_TABLE: ${self:custom.packagesTable}
     WRAP_USER_KEY: ${self:custom.wrap_account.api_key}
-    DEPLOYMENT_STAGE: ${env:DEPLOYMENT_STAGE}
+    DEPLOYMENT_STAGE: prod
 
 custom:
   serverless-offline:
@@ -35,8 +35,8 @@ custom:
   rust:
     dockerless: true
   customDomain:
-    domainName: wraps.wrapscan.com
-    certificateName: wrapscan.com
+    domainName: wraps.wrapscan.io
+    certificateName: wraps.wrapscan.io
     createRoute53Record: true
   dynamodb:
     start:
@@ -45,7 +45,7 @@ custom:
       heapInitial: 200m
       heapMax: 1g
       migrate: true
-  packagesTable: wraps-table-${opt:stage}
+  packagesTable: wraps-table-prod
   wrap_account: ${ssm:/aws/reference/secretsmanager/wrap-account}
 
 functions:
@@ -61,14 +61,14 @@ functions:
     handler: gateway_service
     events:
       - http:
-          path: u/{user}/{packageAndVersion}
+          path: r/{user}/{packageAndVersion}
           method: post
           cors: true
   resolve:
     handler: gateway_service
     events:
       - http:
-          path: u/{user}/{packageAndVersion}/{filePath}
+          path: r/{user}/{packageAndVersion}/{filePath}
           method: get
           cors: true
 

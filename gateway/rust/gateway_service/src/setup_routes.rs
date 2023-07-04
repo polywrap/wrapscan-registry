@@ -43,27 +43,25 @@ pub async fn setup_routes() -> Result<(), HttpError> {
     let route_prefix = {
         #[cfg(not(feature = "local"))]
         {
-            std::env::var(constants::ENV_STAGE)
-                .expect("ENV_STAGE not set")
-                .to_string()
+            &std::env::var(constants::ENV_STAGE).expect("ENV_STAGE not set")
         }
         #[cfg(feature = "local")]
         {
-            "".to_string()
+            ""
         }
     };
 
     let app = Router::new()
         .route(
-            &(route_prefix.clone() + "/"),
+            &("/".to_string() + route_prefix + "/"),
             get(routes::home).with_state(deps.clone()),
         )
         .route(
-            &(route_prefix.clone() + "/r/:user/:packageAndVersion/*filePath"),
+            &("/".to_string() + route_prefix + "/r/:user/:packageAndVersion/*filePath"),
             get(routes::resolve).with_state(deps.clone()),
         )
         .route(
-            &(route_prefix + "/r/:user/:packageAndVersion"),
+            &("/".to_string() + route_prefix + "/r/:user/:packageAndVersion"),
             post(routes::publish).with_state(deps),
         );
 

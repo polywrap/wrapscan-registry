@@ -27,7 +27,7 @@ provider:
   environment:
     PACKAGES_TABLE: ${self:custom.packagesTable}
     WRAP_USER_KEY: ${env:WRAP_USER_KEY}
-    DEPLOYMENT_STAGE: ${env:DEPLOYMENT_STAGE}
+    DEPLOYMENT_STAGE: dev
     
 custom:
   serverless-offline:
@@ -35,8 +35,8 @@ custom:
   rust:
     dockerless: true
   customDomain:
-    domainName: wraps-dev.wrapscan.com
-    certificateName: wraps-dev.wrapscan.com
+    domainName: dev.wraps.wrapscan.io
+    certificateName: dev.wraps.wrapscan.io
     createRoute53Record: true
   dynamodb:
     start:
@@ -45,7 +45,7 @@ custom:
       heapInitial: 200m
       heapMax: 1g
       migrate: true
-  packagesTable: wraps-table-${opt:stage}
+  packagesTable: wraps-table-dev
 
 functions:
   home:
