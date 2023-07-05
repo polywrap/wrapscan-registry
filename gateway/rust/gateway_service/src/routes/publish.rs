@@ -58,10 +58,10 @@ pub struct UriBody {
 
 #[cfg(not(feature = "local"))]
 async fn get_wrap_account_service() -> impl AccountService {
-    use crate::accounts::SingleAccountService;
+    use crate::{accounts::SingleAccountService, constants::POLYWRAP_USERNAME};
 
     SingleAccountService::new(
-        "wrap".parse().unwrap(),
+        POLYWRAP_USERNAME.parse().unwrap(),
         std::env::var(constants::ENV_WRAP_USER_KEY).expect("ENV_WRAP_USER_KEY not set"),
     )
 }

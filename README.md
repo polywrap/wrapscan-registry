@@ -7,6 +7,9 @@ The primary function of the registry is to facilitate the publishing of URIs, ac
 
 ### Routes: 
 - `GET /` - Home: get version of the registry
+- `GET /r/{user}/{package_and_version}` - Get the latest version of the wrap
+  - Returns: 
+    - Body `{ name: "0.1.0", uri: "wrap://...", ... }`
 - `GET /r/{user}/{package_and_version}/wrap.info` - Get the published URI for the wrap
   - Returns: 
     - Header `x-wrap-uri: wrap://...`
