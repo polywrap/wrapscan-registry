@@ -5,5 +5,6 @@ pub const ENV_STAGE: &str = "DEPLOYMENT_STAGE";
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const WRAP_URI_HEADER: &str = "x-wrap-uri";
 pub const PACKAGES_TABLE_KEY_NAME: &str = "id";
+pub const POLYWRAP_USERNAME: &str = "polywrap";
 #[cfg(feature = "local")]
 pub const PACKAGES_TABLE_LOCAL: &str = "wraps-table-dev";
