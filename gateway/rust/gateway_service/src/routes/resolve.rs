@@ -5,7 +5,7 @@ use axum::{
 };
 use http::StatusCode;
 
-use crate::{constants, debug_println, functions, models::Package, Repository};
+use crate::{constants, debug_println, functions, models::Package, Repository, http_utils::internal_server_error};
 
 use super::Dependencies;
 
@@ -24,11 +24,7 @@ where
         .status(StatusCode::OK)
         .header(constants::WRAP_URI_HEADER, uri.to_string())
         .body(BoxBody::default())
-        .map_err(|e| {
-            debug_println!("Error publishing package: {}", &e);
-            eprintln!("INTERNAL_SERVER_ERROR constructing response: {:?}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+        .map_err(internal_server_error)?;
 
     Ok(response)
 }

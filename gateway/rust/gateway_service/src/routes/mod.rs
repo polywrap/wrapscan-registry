@@ -10,6 +10,9 @@ pub use resolve::*;
 mod latest_version_info;
 pub use latest_version_info::*;
 
+mod package_info;
+pub use package_info::*;
+
 use crate::{models::Package, Repository};
 
 #[derive(Clone)]

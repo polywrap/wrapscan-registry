@@ -65,6 +65,10 @@ pub async fn setup_routes() -> Result<(), HttpError> {
             get(routes::resolve).with_state(deps.clone()),
         )
         .route(
+            &(route_prefix.clone() + "/v/:user/:package"),
+            get(routes::package_info).with_state(deps.clone()),
+        )
+        .route(
             &(route_prefix + "/r/:user/:packageAndVersion"),
             post(routes::publish).with_state(deps),
         );

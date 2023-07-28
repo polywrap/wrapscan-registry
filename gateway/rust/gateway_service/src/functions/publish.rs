@@ -7,7 +7,7 @@ use crate::{
     get_username_package_and_version,
     models::Package,
     publishing::{publish_package, PublishError},
-    AccountService, Repository,
+    AccountService, Repository, http_utils::internal_server_error,
 };
 
 pub async fn publish(
@@ -36,10 +36,7 @@ pub async fn publish(
         .map_err(log_error)
         .map_err(|e| match e {
             KeyValidationError::Invalid => StatusCode::UNAUTHORIZED,
-            KeyValidationError::Unknown(e) => {
-                eprintln!("INTERNAL_SERVER_ERROR verifying user key: {:?}", e);
-                StatusCode::INTERNAL_SERVER_ERROR
-            }
+            KeyValidationError::Unknown(e) => internal_server_error(e)
         })?;
 
     debug_println!("Publishing package: {:?}", &package_name);
@@ -53,10 +50,7 @@ pub async fn publish(
             // If the version name and URI are the same, then we can just return OK since nothing needs to be change.
             PublishError::DuplicateVersionNameAndUri => StatusCode::OK,
             PublishError::LatestVersionNotAllowed => StatusCode::BAD_REQUEST,
-            PublishError::RepositoryError(e) => {
-                eprintln!("INTERNAL_SERVER_ERROR publishing package: {:?}", e);
-                StatusCode::INTERNAL_SERVER_ERROR
-            }
+            PublishError::RepositoryError(e) => internal_server_error(e),
         })?;
 
     Ok(())
