@@ -23,3 +23,9 @@ pub fn extract_api_key_from_headers(headers: HeaderMap) -> Result<String, Status
         .map_err(log_error)
         .map_err(|_| StatusCode::UNAUTHORIZED)
 }
+
+pub fn internal_server_error<E: std::fmt::Debug>(e: E) -> StatusCode {
+    debug!(&e);
+    eprintln!("INTERNAL_SERVER_ERROR serializing package: {:?}", e);
+    StatusCode::INTERNAL_SERVER_ERROR
+}
