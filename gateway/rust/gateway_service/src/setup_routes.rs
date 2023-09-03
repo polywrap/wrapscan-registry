@@ -53,11 +53,6 @@ pub async fn setup_routes() -> Result<(), HttpError> {
         }
     };
 
-    let cors = CorsLayer::new()
-        .allow_headers(Any)
-        .allow_methods(vec![Method::GET, Method::POST, Method::OPTIONS, Method::HEAD, Method::PUT, Method::DELETE])
-        .allow_origin(Any);
-
     let app = Router::new()
         .route(
             &(route_prefix.clone() + "/"),
@@ -78,7 +73,7 @@ pub async fn setup_routes() -> Result<(), HttpError> {
         .route(
             &(route_prefix + "/r/:user/:packageAndVersion"),
             post(routes::publish).with_state(deps),
-        ).layer(cors);
+        ).layer(CorsLayer::permissive());
 
     #[cfg(not(feature = "local"))]
     {
