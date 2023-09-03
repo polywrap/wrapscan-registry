@@ -4,7 +4,9 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use http::Method;
 use lambda_http::{run, Error as HttpError};
+use tower_http::cors::{Any, CorsLayer};
 
 use crate::{
     constants,
@@ -51,6 +53,11 @@ pub async fn setup_routes() -> Result<(), HttpError> {
         }
     };
 
+    let cors = CorsLayer::new()
+        .allow_headers(Any)
+        .allow_methods(vec![Method::GET, Method::POST, Method::OPTIONS, Method::HEAD, Method::PUT, Method::DELETE])
+        .allow_origin(Any);
+
     let app = Router::new()
         .route(
             &(route_prefix.clone() + "/"),
@@ -71,7 +78,7 @@ pub async fn setup_routes() -> Result<(), HttpError> {
         .route(
             &(route_prefix + "/r/:user/:packageAndVersion"),
             post(routes::publish).with_state(deps),
-        );
+        ).layer(cors);
 
     #[cfg(not(feature = "local"))]
     {
@@ -80,7 +87,7 @@ pub async fn setup_routes() -> Result<(), HttpError> {
 
     #[cfg(feature = "local")]
     {
-        let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 3000));
+        let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 3001));
         axum::Server::bind(&addr)
             .serve(app.into_make_service())
             .await
